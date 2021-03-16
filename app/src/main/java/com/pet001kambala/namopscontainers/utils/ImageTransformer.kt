@@ -1,4 +1,4 @@
-package com.pet001kambala.remotefiletransfer.utils
+package com.pet001kambala.namopscontainers.utils
 
 import android.graphics.*
 import com.squareup.picasso.Picasso

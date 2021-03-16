@@ -4,28 +4,42 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
-import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.pet001kambala.namopscontainers.R
+import com.pet001kambala.namopscontainers.databinding.FragmentHomeBinding
+import com.pet001kambala.namopscontainers.ui.AbstractFragment
+import com.pet001kambala.namopscontainers.utils.Const
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-class HomeFragment : Fragment() {
+class HomeFragment : AbstractFragment() {
 
     private lateinit var homeViewModel: HomeViewModel
+    private lateinit var binding: FragmentHomeBinding
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
-    ): View? {
-        homeViewModel =
-                ViewModelProvider(this).get(HomeViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_home, container, false)
-        val textView: TextView = root.findViewById(R.id.text_home)
-        homeViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
-        return root
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+
+        binding = FragmentHomeBinding.inflate(inflater, container, false)
+
+        return binding.root
+    }
+
+    @ExperimentalCoroutinesApi
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.preAssignedJob.setOnClickListener {
+            val bundle = Bundle()
+            bundle.putString(Const.TOOLBAR_TITLE, "Pre-Assigned Jobs")
+            navController.navigate(R.id.action_nav_home_to_jobCardListFragment, bundle)
+        }
+
+        binding.unassignedJob.setOnClickListener {
+            val bundle = Bundle().also { it.putString(Const.TOOLBAR_TITLE, "Un-Assigned Jobs") }
+            navController.navigate(R.id.action_nav_home_to_jobCardListFragment, bundle)
+
+        }
     }
 }

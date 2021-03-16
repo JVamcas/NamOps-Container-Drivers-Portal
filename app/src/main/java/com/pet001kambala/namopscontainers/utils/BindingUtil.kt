@@ -8,6 +8,8 @@ import androidx.annotation.IdRes
 import androidx.databinding.BindingAdapter
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import com.pet001kambala.namopscontainers.utils.Const
+import com.pet001kambala.namopscontainers.utils.ImageTransformer
 import com.pet001kambala.namopscontainers.utils.ParseUtil
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isValidEmail
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isValidMobile
@@ -139,7 +141,9 @@ class BindingUtil {
                 else null
         }
 
-
+        private fun isValidSelection(list: ArrayList<String?>): Boolean {
+            return !list.any { it.isNullOrEmpty() || it.contains("Select") }
+        }
 
 
         /***
@@ -153,12 +157,12 @@ class BindingUtil {
         @BindingAdapter(value = ["viewId", "default_icon", "photoUrl", "size"])
         fun loadImage(
             mView: ImageView,
-            viewId: String?,
+            viewId: Long?,
             @IdRes default_icon: Int,
             photoUrl: String?,
             size: Int
         ) {
-            val filePath = ParseUtil.iconPath(Const.IMAGE_ROOT_PATH, viewId ?: "")
+            val filePath = ParseUtil.iconPath(Const.IMAGE_ROOT_PATH, (viewId ?: "").toString())
             val absPath = ParseUtil.findFilePath(mView.context, filePath)
 
             Picasso.get().invalidate(absPath)
@@ -171,11 +175,6 @@ class BindingUtil {
                     default_icon
                 )
             creator.into(mView)
-        }
-
-
-        private fun isValidSelection(list: ArrayList<String?>): Boolean {
-            return !list.any { it.isNullOrEmpty() || it.contains("Select") }
         }
 
 

@@ -1,22 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".ui.home.HomeFragment">
+    >
 
-    <TextView
-        android:id="@+id/text_home"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <FrameLayout
+
+        android:layout_height="match_parent"
+        android:layout_width="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:context=".ui.home.HomeFragment"
+            android:layout_gravity="center_vertical"
+            android:padding="20dp"
+            >
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/pre_assigned_job"
+                android:text="@string/pre_assigned"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:padding="20dp"
+                android:layout_marginBottom="20dp"
+                style="@style/save_btn_outlined_less_round"
+                android:textStyle="bold"
+                android:backgroundTint="@color/hint_color"
+                android:textColor="@color/white"
+                />
+
+            <com.google.android.material.button.MaterialButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/unassigned_job"
+                android:text="@string/un_assigned"
+                android:layout_marginTop="20dp"
+                android:backgroundTint="@color/colorPrimaryDark"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:padding="20dp"
+                style="@style/save_btn_outlined_less_round"
+                app:layout_constraintTop_toBottomOf="@id/pre_assigned_job"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                />
+
+            <include layout="@layout/text_separator_line"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:id="@+id/text_sep"
+                app:layout_constraintTop_toBottomOf="@+id/unassigned_job"
+                bind:title="@{`Current Trip`}"
+                android:layout_marginTop="40dp"
+                />
+            <include layout="@layout/trip_layout"
+                android:layout_margin="10dp"
+                android:id="@+id/trip_layout"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                />
+
+            <com.google.android.material.textview.MaterialTextView
+                app:layout_constraintTop_toBottomOf="@id/text_sep"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginTop="50dp"
+                android:textColor="@color/hint_color"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/no_trip"
+                android:textStyle="bold"
+                android:text="@string/no_trip_found"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </FrameLayout>
+
+</layout>
+

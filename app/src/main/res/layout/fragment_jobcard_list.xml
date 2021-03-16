@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/no_users_yet"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|center_horizontal"
+            android:text="@string/snap_nothing_here"
+            android:textAlignment="center"
+            android:textStyle="bold"
+            android:textColor="@color/hint_color"
+            android:visibility="@{jobCardCount > 0? View.GONE: View.VISIBLE}" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/accounts_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="2dp"
+            android:visibility="@{jobCardCount > 0? View.VISIBLE: View.GONE}"
+            tools:listitem="@layout/job_card_layout" />
+
+    </FrameLayout>
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="jobCardCount"
+            type="Integer" />
+    </data>
+</layout>

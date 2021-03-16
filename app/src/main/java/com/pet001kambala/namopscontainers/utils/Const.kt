@@ -1,7 +1,9 @@
-package com.pet001kambala.remotefiletransfer.utils
+package com.pet001kambala.namopscontainers.utils
 
 internal interface Const {
     companion object {
+        val IS_PRE_ASSIGNED: String = "isPreAssigned"
+        val TITLE: String = "Title"
         const val SNAP_CONTAINER: String = "Snap Container"
         const val SNAP_DRIVER: String = "Snap Driver"
         const val TOOLBAR_TITLE: String = "toolbar title"

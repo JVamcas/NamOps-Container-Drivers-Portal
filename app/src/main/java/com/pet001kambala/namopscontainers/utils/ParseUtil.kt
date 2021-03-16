@@ -3,13 +3,10 @@ package com.pet001kambala.namopscontainers.utils
 import android.accounts.Account
 import android.content.Context
 import android.text.TextUtils
-import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
-import com.pet001kambala.namopscontainers.ui.model.AbstractModel
-import com.pet001kambala.remotefiletransfer.utils.AccessType
-import com.squareup.picasso.Picasso
+import com.google.gson.reflect.TypeToken
+import com.pet001kambala.namopscontainers.model.AbstractModel
 import java.io.File
-import java.util.*
 import java.util.regex.Pattern
 
 class ParseUtil {
@@ -53,31 +50,6 @@ class ParseUtil {
             return if (file.exists()) "file:" + file.absolutePath else null
         }
 
-
-        fun Account?.isAuthorized(accessType: AccessType) =
-            this != null && (permissionList.contains(accessType.name) || //is authorised
-                    permissionList.contains(AccessType.ADMIN.name)) //or is admin
-
-
-        fun initDirs(mContext: Context, vararg param: String) {
-            //create dir for storing profile pictures
-            for (dir in param) {
-                val parentDir = File(mContext.getExternalFilesDir(null), dir)
-                if (!parentDir.exists()) parentDir.mkdirs()
-            }
-        }
-
-        /***
-         * Compute relative path for the view's icon
-         * @param rtDir the base dir for the icon
-         * @param viewId id of the view
-         * @return the relative path
-         */
-        fun iconPath(rtDir: String?, viewId: String): String {
-            return StringBuilder(rtDir ?: "").append("/_").append(viewId).append("_.jpg")
-                .toString()
-        }
-
         fun isValidEmail(email: String?): Boolean {
             if (email.isNullOrEmpty()) return false
             val email1 = email.replace("\\s+".toRegex(), "")
@@ -105,6 +77,16 @@ class ParseUtil {
                 "0$cell"
             }
         }
+        /***
+         * Compute relative path for the view's icon
+         * @param rtDir the base dir for the icon
+         * @param viewId id of the view
+         * @return the relative path
+         */
+        fun iconPath(rtDir: String?, viewId: String): String {
+            return StringBuilder(rtDir ?: "").append("/_").append(viewId).append("_.jpg")
+                .toString()
+        }
 
         @JvmStatic
         fun String?.toPhone(): String {
@@ -117,12 +99,6 @@ class ParseUtil {
 
         fun isValidAuthCode(code: String?): Boolean {
             return code?.length ?: 0 == 6
-        }
-
-        fun refreshImage(context: Context, rtDir: String, viewId: String) {
-            val filePath = iconPath(rtDir, viewId)
-            val absPath = findFilePath(context, filePath)
-            Picasso.get().invalidate(absPath)
         }
     }
 }

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    >
+    <LinearLayout
+        android:orientation="vertical" android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/transparent"
+        android:gravity="bottom"
+        android:paddingBottom="200dp"
+        >
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_margin="5dp"
+           android:indeterminateTint="@color/hint_color"
+            android:indeterminateBehavior="repeat"
+            />
+        <com.google.android.material.textview.MaterialTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:layout_gravity="bottom|center_horizontal"
+            android:textColor="@color/hint_color"
+            android:textAlignment="center"
+            android:id="@+id/progress_msg"
+            />
+    </LinearLayout>
+</layout>

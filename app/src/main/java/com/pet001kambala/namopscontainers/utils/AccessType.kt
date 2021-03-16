@@ -1,4 +1,4 @@
-package com.pet001kambala.remotefiletransfer.utils
+package com.pet001kambala.namopscontainers.utils
 
 enum class AccessType(var value: String) {
 

@@ -1,25 +1,82 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
     <!-- Base application theme. -->
-    <style name="Theme.NamOpsContainers" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/purple_500</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/teal_200</item>
-        <item name="colorSecondaryVariant">@color/teal_700</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
         <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimary</item>
+        <item name="colorAccent">@color/colorPrimary</item>
+        <item name="colorSecondary">@color/app_bar</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="textInputStyle">@style/text_input_layout</item>
     </style>
 
-    <style name="Theme.NamOpsContainers.NoActionBar">
+    <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>
 
-    <style name="Theme.NamOpsContainers.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    <style name="switch_theme" parent="ThemeOverlay.MaterialComponents">
+        <item name="colorOnSurface">@color/emphasis_color</item>
+        <item name="colorControlActivated">@color/app_bar</item>
+    </style>
 
-    <style name="Theme.NamOpsContainers.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+
+    <style name="exit_btn_theme" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="backgroundTint">#664B4E4A</item>
+        <item name="elevation">15dp</item>
+        <item name="cornerRadius">15dp</item>
+        <item name="android:paddingStart">15dp</item>
+        <item name="android:paddingEnd">15dp</item>
+        <item name="android:textColor">#fff</item>
+        <item name="android:textSize">16sp</item>
+        <item name="rippleColor">#F1E9ED</item>
+    </style>
+
+    <style name="exit_btn_outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="strokeColor">@color/hint_color</item>
+        <item name="android:textColor">@color/hint_color</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="rippleColor">@color/hint_color</item>
+        <item name="cornerRadius">20dp</item>
+    </style>
+
+    <style name="save_btn_outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="strokeColor">@color/app_color</item>
+        <item name="android:textColor">@color/app_bar</item>
+        <item name="backgroundTint">@color/save_btn_enabled</item>
+        <item name="strokeWidth">1dp</item>
+        <item name="rippleColor">@color/app_color</item>
+        <item name="cornerRadius">20dp</item>
+    </style>
+
+    <style name="save_btn_outlined_less_round" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:textColor">@color/app_bar</item>
+        <item name="backgroundTint">@color/save_btn_enabled</item>
+        <item name="rippleColor">@color/btn_ripple_color</item>
+        <item name="cornerRadius">5dp</item>
+    </style>
+
+    <style name="save_btn_no_outline" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/app_bar</item>
+        <item name="backgroundTint">@color/save_btn_enabled</item>
+        <item name="rippleColor">@color/white</item>
+        <item name="cornerRadius">25dp</item>
+    </style>
+
+    <style name="text_input_layout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:background">@color/white</item>
+        <item name="hintTextColor">@color/hint_color</item>
+        <item name="borderWidth">1dp</item>
+    </style>
+
+    <style name="dropdown_menu" parent="Widget.AppCompat.EditText">
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:textColorHint">@color/hint_color</item>
+    </style>
+
 </resources>
