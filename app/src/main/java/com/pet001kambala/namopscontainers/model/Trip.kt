@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 import com.pet001kambala.namopscontainers.BR
 
 data class Trip(
-    val driverId: Int
+    val driverId: Int? = null
 ) : AbstractModel() {
 
     /** truck and trailer info start **/
@@ -43,7 +43,7 @@ data class Trip(
 
     /** trip start info start **/
     @Bindable
-    var startODM: Long? = null
+    var startODM: String? = null
         set(value) {
             if (field != value) {
                 field = value

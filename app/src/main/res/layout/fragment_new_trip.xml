@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            >
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/truck_reg_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                >
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/truck_reg"
+                    truck_reg="@{trip.truckReg}"
+                    errorMsg="@{`Invalid truck number.`}"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/truck_reg"
+                    android:inputType="text"
+                    android:paddingBottom="9dp"
+                    android:singleLine="true"
+                    android:text="@={trip.truckReg}" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/first_trailer_reg_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/truck_reg_layout">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/first_trailer_reg"
+                    plateNumber="@{trip.firstTrailerReg}"
+                    errorMsg="@{`Invalid plate number.`}"
+                    isSecondTrailer="@{false}"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/first_trailer"
+                    android:inputType="textAutoComplete"
+                    android:paddingBottom="9dp"
+                    android:singleLine="true"
+                    android:text="@={trip.firstTrailerReg}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/second_trailer_reg_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/first_trailer_reg_layout">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/second_trailer_reg"
+                    plateNumber="@{trip.secondTrailerReg}"
+                    errorMsg="@{`Invalid plate number.`}"
+                    isSecondTrailer="@{true}"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/second_trailer_reg"
+                    android:inputType="text"
+                    android:paddingBottom="9dp"
+                    android:singleLine="true"
+                    android:text="@={trip.secondTrailerReg}" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/startODM_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/second_trailer_reg_layout">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/startODM"
+                    editContent="@{trip.startODM}"
+                    errorMsg="@{`Please input the truck Odometer.`}"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/truck_odo"
+                    android:inputType="text"
+                    android:paddingBottom="9dp"
+                    android:singleLine="true"
+                    android:text="@={trip.startODM}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/startLocationName_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/startODM_layout">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/startLocationName"
+                    editContent="@{trip.startLocationName}"
+                    errorMsg="@{`Please input the current location name.`}"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/current_location_name"
+                    android:inputType="text"
+                    android:paddingBottom="9dp"
+                    android:singleLine="true"
+                    android:text="@={trip.startLocationName}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/register"
+                style="@style/save_btn_outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:textAllCaps="false"
+                android:enabled="false"
+                android:text="@string/register"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/startLocationName_layout" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </FrameLayout>
+
+    <data>
+        <variable
+            name="trip"
+            type="com.pet001kambala.namopscontainers.model.Trip" />
+    </data>
+</layout>

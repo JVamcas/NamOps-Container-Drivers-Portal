@@ -19,5 +19,10 @@
         android:label=""
         android:name="com.pet001kambala.namopscontainers.ui.jobcard.JobCardListFragment"
         tools:layout="@layout/fragment_jobcard_list" />
+    <fragment
+        android:id="@+id/newTripFragment"
+        android:name="com.pet001kambala.namopscontainers.ui.trip.NewTripFragment"
+        android:label="Start New Trip"
+        tools:layout="@layout/fragment_new_trip" />
 
 </navigation>
