@@ -1,59 +1,47 @@
 package com.pet001kambala.namopscontainers.ui.jobcard
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.liveData
+import androidx.lifecycle.*
 import com.pet001kambala.namopscontainers.repo.JobCardRepo
 import com.pet001kambala.namopscontainers.ui.jobcard.JobCardViewModel.Repo.jobCardRepo
 import com.pet001kambala.namopscontainers.utils.Results
 import java.lang.Exception
 
 class JobCardViewModel : ViewModel() {
+
     object Repo {
         val jobCardRepo = JobCardRepo()
     }
+//
+//    private val driverId = MutableLiveData<Int>()
+//
+//    val preAssignedJobCards = driverId.switchMap { driverId ->
+//        liveData(context = viewModelScope.coroutineContext + Dispatchers.IO) {
+//            emit(Results.Loading)
+//            try {
+//                emit(jobCardRepo.loadPreAssignedJobCards(driverId))
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//                emit(Results.Error(e))
+//            }
+//        }
+//    }
+//
+//    val unAssignedJobCards = liveData {
+//        emit(Results.Loading)
+//        try {
+//            emit(jobCardRepo.loadUnAssignedJobCards())
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//            emit(Results.Error(e))
+//        }
+//    }
 
-    val preAssignedJobCards = liveData {
+
+
+    val allIncompleteJobCards = liveData {
         emit(Results.Loading)
         try {
-            val data = jobCardRepo.loadPreAssignedJobCards()
-            emit(
-                Results.Success(
-                    data = data,
-                    code = Results.Success.CODE.LOAD_SUCCESS
-                )
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-            emit(Results.Error(e))
-        }
-    }
-
-    val unAssignedJobCards = liveData {
-        emit(Results.Loading)
-        try {
-            val data = jobCardRepo.loadUnAssignedJobCards()
-            emit(
-                Results.Success(
-                    data = data,
-                    code = Results.Success.CODE.LOAD_SUCCESS
-                )
-            )
-        } catch (e: Exception) {
-            e.printStackTrace()
-            emit(Results.Error(e))
-        }
-    }
-
-    val allJobCards = liveData {
-        emit(Results.Loading)
-        try {
-            val data = jobCardRepo.loadAllJobCards()
-            emit(
-                Results.Success(
-                    data = data,
-                    code = Results.Success.CODE.LOAD_SUCCESS
-                )
-            )
+            emit(jobCardRepo.loadAllJobCardItemsOnIncmpleteJobCards())
         } catch (e: Exception) {
             e.printStackTrace()
             emit(Results.Error(e))

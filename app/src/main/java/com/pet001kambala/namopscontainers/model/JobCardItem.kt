@@ -1,17 +1,24 @@
 package com.pet001kambala.namopscontainers.model
 
 import androidx.annotation.Keep
+import java.time.LocalDateTime
 
 /**
- * [JobCardItem] can have multiple containers, it might be pre-assigned in which case [driverId] will be set
+ * [JobCardItem] can have multiple containers, it might be pre-assigned in which case [driver] will be set
  */
 @Keep
 data class JobCardItem(
-    val jobCardNo: Int,
+    val jobCardNo: String,
     val containerNo: String? = null,
     val containerSize: String? = null,
+    val pickUpLocationName: String? = null,
     val isFull: Boolean = false,
     val customerRef: String? = null,
-    val driverId: Int? = null, //assigned if container is full
-    val isCompleted: Boolean = false // whether or not the job card item is completed so as not to include it again.
+    val driver: Driver? = null, //assigned if container is full
+    val jobCardCompleted: Boolean = false, // whether or not the job card item is completed so as not to include it again.
+    val wasPickedUp: Boolean = false,
+    val scanContainer: Boolean = false,
+    val useBison: Boolean  = false,
+    val useWeighBridge: Boolean = false,
+    val designatePickUpDate: LocalDateTime? = null
 ) : AbstractModel()

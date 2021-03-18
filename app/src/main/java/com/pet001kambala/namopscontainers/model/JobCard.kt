@@ -4,12 +4,12 @@ data class JobCard(
     val jobCardNo: String,
     val totalContainers: Int,
     var pendingContainers: Int,
-    var pickUpLocation: String,
+    var pickUpLocationName: String,
     var jobCardItemList: List<JobCardItem>
 
 ): AbstractModel() {
 
     override fun toString(): String {
-        return "Pick up $pendingContainers from $pickUpLocation"
+        return "Pick up $pendingContainers containers from $pickUpLocationName"
     }
 }

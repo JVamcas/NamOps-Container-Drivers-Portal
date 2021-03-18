@@ -5,13 +5,18 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.viewModelScope
 import com.pet001kambala.namopscontainers.MainActivity
+import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.FragmentJobcardListBinding
 import com.pet001kambala.namopscontainers.model.JobCard
+import com.pet001kambala.namopscontainers.repo.JobCardRepo
 import com.pet001kambala.namopscontainers.ui.AbstractListFragment
 import com.pet001kambala.namopscontainers.utils.Const
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.toJson
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 
 
 class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHolder>() {
@@ -43,31 +48,43 @@ class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHol
         super.onViewCreated(view, savedInstanceState)
         (requireActivity() as MainActivity).supportActionBar?.title = toolbarTitle
 
-        jobCardModel.allJobCards.observe(viewLifecycleOwner) {
+        handleRecycleView(binding.accountsRecycler, this)
 
-            when (it) {
-                is Results.Loading -> showProgressBar("Just a moment...")
-                is Results.Success<*> -> {
-                    endProgressBar()
+        jobCardModel.viewModelScope.launch {
+            binding.jobCardCount = 1
 
-                    val preAssigned =
-                        (it.data as ArrayList<JobCard>).filter { it.jobCardItemList.any { it.driverId != null } }
-                    val unAssigned =
-                        it.data.filter { it.jobCardItemList.any { it.driverId == null } }
-                    val data =
-                        (if (isPreAssignedJobs) preAssigned else unAssigned) as ArrayList<JobCard>
+            if (isPreAssignedJobs) {
+                showProgressBar("Just a moment...")
+                val results = JobCardRepo().loadPreAssignedJobCards(4)
+                endProgressBar()
+                if (results is Results.Success<*>) {
+                    val data = results.data as ArrayList<JobCard>
 
                     binding.jobCardCount = data.size
 
                     if (!data.isNullOrEmpty()) {
                         mAdapter.modelList = data
-                        binding.jobCardCount = mAdapter.itemCount
+                        binding.jobCardCount = data.size
                     }
-                }
-                else -> {
-                    endProgressBar()
-                    parseRepoResults(it)
-                }
+                } else
+                    parseRepoResults(results)
+
+
+            } else {
+                showProgressBar("Just a moment...")
+                val results = JobCardRepo().loadUnAssignedJobCards()
+                endProgressBar()
+                if (results is Results.Success<*>) {
+                    val data = results.data as ArrayList<JobCard>
+
+                    binding.jobCardCount = data.size
+
+                    if (!data.isNullOrEmpty()) {
+                        mAdapter.modelList = data
+                        binding.jobCardCount = data.size
+                    }
+                } else
+                    parseRepoResults(results)
             }
         }
     }
@@ -86,6 +103,8 @@ class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHol
 
     override fun onModelClick(model: JobCard) {
 
+        val bundle = Bundle().also { it.putString(Const.JOB_CARD, model.toJson()) }
+        navController.navigate(R.id.action_taskListFragment_to_newTripFragment, bundle)
     }
 
     override fun onModelIconClick(model: JobCard) {

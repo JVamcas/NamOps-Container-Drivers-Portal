@@ -18,7 +18,11 @@
         android:id="@+id/taskListFragment"
         android:label=""
         android:name="com.pet001kambala.namopscontainers.ui.jobcard.JobCardListFragment"
-        tools:layout="@layout/fragment_jobcard_list" />
+        tools:layout="@layout/fragment_jobcard_list" >
+        <action
+            android:id="@+id/action_taskListFragment_to_newTripFragment"
+            app:destination="@id/newTripFragment" />
+    </fragment>
     <fragment
         android:id="@+id/newTripFragment"
         android:name="com.pet001kambala.namopscontainers.ui.trip.NewTripFragment"

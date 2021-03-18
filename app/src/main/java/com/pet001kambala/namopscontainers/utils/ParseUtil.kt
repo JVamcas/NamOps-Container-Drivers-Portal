@@ -6,6 +6,7 @@ import android.text.TextUtils
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.pet001kambala.namopscontainers.model.AbstractModel
+import com.pet001kambala.namopscontainers.model.JobCardItem
 import java.io.File
 import java.util.regex.Pattern
 
@@ -67,6 +68,9 @@ class ParseUtil {
                 phone1
             )
         }
+
+        fun JobCardItem?.preAssigned() =
+            this != null && this.id != 0
 
         fun String?.stripCountryCode(): String? {
             return if (this == null)

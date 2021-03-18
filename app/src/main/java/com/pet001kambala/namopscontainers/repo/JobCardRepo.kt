@@ -1,25 +1,99 @@
 package com.pet001kambala.namopscontainers.repo
 
 import com.pet001kambala.namopscontainers.model.JobCard
+import com.pet001kambala.namopscontainers.model.JobCardItem
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.convert
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.toJson
+import com.pet001kambala.namopscontainers.utils.Results
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
 
 class JobCardRepo {
 
 
-    suspend fun loadPreAssignedJobCards(): ArrayList<JobCard>{
+    suspend fun loadPreAssignedJobCards(driverId: Int): Results {
 
+        val results = loadAllJobCardItemsOnIncmpleteJobCards()
+        return if (results is Results.Success<*>) {
+            val jobCardItems = results.data as ArrayList<JobCardItem>
+            val filteredJobCardItems = jobCardItems.filter { it.driver?.id ?: -1 == driverId }
 
-        return arrayListOf()
+            val jobCardList = if (filteredJobCardItems.isNullOrEmpty()) {
+                filteredJobCardItems.groupBy { it.jobCardNo }
+                    .map {
+                        JobCard(
+                            jobCardNo = it.key,
+                            totalContainers = it.value.size,
+                            pickUpLocationName = it.value[0].pickUpLocationName ?: "Unknown",
+                            jobCardItemList = it.value,
+                            pendingContainers = it.value.count { !it.wasPickedUp })
+                    }
+            } else arrayListOf()
+
+            Results.Success(data = ArrayList(jobCardList), code = Results.Success.CODE.LOAD_SUCCESS)
+
+        } else results
     }
 
-    suspend fun loadUnAssignedJobCards(): ArrayList<JobCard>{
+    suspend fun loadUnAssignedJobCards(): Results {
+        val results = loadAllJobCardItemsOnIncmpleteJobCards()
+        return if (results is Results.Success<*>) {
+            val jobCardItems = results.data as ArrayList<JobCardItem>
+            val filteredJobCardItems = jobCardItems.filter { it.driver?.id ?: -1 == 0 }
+            val jobCardList = filteredJobCardItems.groupBy { it.jobCardNo }
+            val other = jobCardList.map {
+                JobCard(
+                    jobCardNo = it.key,
+                    totalContainers = it.value.size,
+                    pickUpLocationName = it.value[0].pickUpLocationName ?: "Unknown",
+                    jobCardItemList = it.value,
+                    pendingContainers = it.value.count { !it.wasPickedUp })
+            }
+            print(other.toJson())
+//            val jobCardList = if (filteredJobCardItems.isNullOrEmpty()) {
+//               val t =  filteredJobCardItems
+//                    .groupBy { it.jobCardNo }
+//                    .map {
+//                        JobCard(
+//                            jobCardNo = it.key,
+//                            totalContainers = it.value.size,
+//                            pickUpLocationName = it.value[0].pickUpLocationName ?: "Unknown",
+//                            jobCardItemList = it.value,
+//                            pendingContainers = it.value.count { !it.wasPickedUp })
+//                    }
+//                print(t)
+//                t
+//            } else arrayListOf()
 
+            Results.Success(data = ArrayList(other), code = Results.Success.CODE.LOAD_SUCCESS)
 
-        return arrayListOf()
+        } else results
     }
 
-    suspend fun loadAllJobCards(): ArrayList<JobCard>{
+    suspend fun loadAllJobCardItemsOnIncmpleteJobCards(): Results {
+        val url = "http://192.168.178.75:8081/namops_driver_portal/all_job_cards"
+        val client = OkHttpClient.Builder().build()
+        val request = Request.Builder()
+            .url(url)
+            .build()
 
+        return try {
+            withContext(Dispatchers.IO) {
+                val results = client.newCall(request).execute()//wait for the results from api
+                val data = results.body?.string()
+                val jobCardItems = if (data.isNullOrEmpty())
+                    arrayListOf() else data.convert<ArrayList<JobCardItem>>()
+                Results.Success(
+                    data = jobCardItems,
+                    code = Results.Success.CODE.LOAD_SUCCESS
+                )
 
-        return arrayListOf()
+            }
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+            Results.Error(e)
+        }
     }
 }

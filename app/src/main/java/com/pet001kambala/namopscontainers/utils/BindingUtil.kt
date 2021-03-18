@@ -1,4 +1,4 @@
-package com.pet001kambala.remotefiletransfer.utils
+package com.pet001kambala.namopscontainers.utils
 
 import android.text.Editable
 import android.text.TextWatcher
@@ -8,9 +8,6 @@ import androidx.annotation.IdRes
 import androidx.databinding.BindingAdapter
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
-import com.pet001kambala.namopscontainers.utils.Const
-import com.pet001kambala.namopscontainers.utils.ImageTransformer
-import com.pet001kambala.namopscontainers.utils.ParseUtil
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isValidEmail
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isValidMobile
 
@@ -24,6 +21,19 @@ class BindingUtil {
         fun emptyEdit(mEditText: EditText, errorMsg: String?, value: String?) {
             mEditText.error = if (value.isNullOrEmpty()) errorMsg
             else null
+        }
+
+        @JvmStatic
+        @BindingAdapter(value = ["errorMsg", "truck_reg"])
+        fun validateTruckReg(mEditText: EditText, errorMsg: String?, truckReg: String?) {
+            mEditText.error = if (truckReg.isNullOrEmpty()) errorMsg
+            else null
+        }
+
+        @JvmStatic
+        @BindingAdapter(value = ["errorMsg", "plateNumber","isSecondTrailer"])
+        fun validateTrailerPlateNumber(mEditText: EditText, errorMsg: String?, plateNumber: String?,isSecondTrailer: Boolean = false) {
+
         }
 
 
@@ -157,7 +167,7 @@ class BindingUtil {
         @BindingAdapter(value = ["viewId", "default_icon", "photoUrl", "size"])
         fun loadImage(
             mView: ImageView,
-            viewId: Long?,
+            viewId: Int?,
             @IdRes default_icon: Int,
             photoUrl: String?,
             size: Int

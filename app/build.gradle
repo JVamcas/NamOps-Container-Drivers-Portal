@@ -47,7 +47,6 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0'
     implementation 'androidx.navigation:navigation-fragment-ktx:2.3.4'
     implementation 'androidx.navigation:navigation-ui-ktx:2.3.4'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
@@ -59,6 +58,9 @@ dependencies {
     implementation "androidx.room:room-ktx:2.2.6"
     kapt "androidx.room:room-compiler:2.2.6"
     androidTestImplementation "androidx.room:room-testing:2.2.6"
+
+    implementation "org.apache.commons:commons-csv:1.8"
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
 
     implementation 'commons-net:commons-net:3.6'
     implementation 'com.squareup.picasso:picasso:2.71828'

@@ -33,6 +33,7 @@ class HomeFragment : AbstractFragment() {
         binding.preAssignedJob.setOnClickListener {
             val bundle = Bundle()
             bundle.putString(Const.TOOLBAR_TITLE, "Pre-Assigned Jobs")
+            bundle.putBoolean(Const.IS_PRE_ASSIGNED,true)
             navController.navigate(R.id.action_nav_home_to_jobCardListFragment, bundle)
         }
 
