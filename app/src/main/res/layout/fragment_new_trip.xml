@@ -108,7 +108,7 @@
                     android:layout_width="fill_parent"
                     android:layout_height="match_parent"
                     android:hint="@string/current_location_name"
-                    android:inputType="text"
+                    android:inputType="numberDecimal"
                     android:paddingBottom="9dp"
                     android:singleLine="true"
                     android:text="@={trip.startLocationName}" />
@@ -121,7 +121,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:textAllCaps="false"
-                android:enabled="false"
                 android:text="@string/register"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/startLocationName_layout" />

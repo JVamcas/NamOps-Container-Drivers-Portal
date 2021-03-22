@@ -4,15 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
 import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.FragmentHomeBinding
+import com.pet001kambala.namopscontainers.model.Trip
 import com.pet001kambala.namopscontainers.ui.AbstractFragment
+import com.pet001kambala.namopscontainers.ui.trip.TripViewModel
 import com.pet001kambala.namopscontainers.utils.Const
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 class HomeFragment : AbstractFragment() {
 
     private lateinit var homeViewModel: HomeViewModel
+    private val tripModel: TripViewModel by activityViewModels()
     private lateinit var binding: FragmentHomeBinding
 
     override fun onCreateView(
@@ -33,7 +37,7 @@ class HomeFragment : AbstractFragment() {
         binding.preAssignedJob.setOnClickListener {
             val bundle = Bundle()
             bundle.putString(Const.TOOLBAR_TITLE, "Pre-Assigned Jobs")
-            bundle.putBoolean(Const.IS_PRE_ASSIGNED,true)
+            bundle.putBoolean(Const.IS_PRE_ASSIGNED, true)
             navController.navigate(R.id.action_nav_home_to_jobCardListFragment, bundle)
         }
 
@@ -41,6 +45,12 @@ class HomeFragment : AbstractFragment() {
             val bundle = Bundle().also { it.putString(Const.TOOLBAR_TITLE, "Un-Assigned Jobs") }
             navController.navigate(R.id.action_nav_home_to_jobCardListFragment, bundle)
 
+        }
+
+        tripModel.currentTrip.observe(viewLifecycleOwner) {
+            it?.let {
+                binding.trip = it
+            }
         }
     }
 }

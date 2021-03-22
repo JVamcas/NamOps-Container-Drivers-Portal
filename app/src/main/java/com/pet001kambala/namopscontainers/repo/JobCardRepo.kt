@@ -1,5 +1,6 @@
 package com.pet001kambala.namopscontainers.repo
 
+import com.pet001kambala.namopscontainers.model.Driver
 import com.pet001kambala.namopscontainers.model.JobCard
 import com.pet001kambala.namopscontainers.model.JobCardItem
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.convert
@@ -13,12 +14,12 @@ import okhttp3.Request
 class JobCardRepo {
 
 
-    suspend fun loadPreAssignedJobCards(driverId: Int): Results {
+    suspend fun loadPreAssignedJobCards(driver: Driver): Results {
 
-        val results = loadAllJobCardItemsOnIncmpleteJobCards()
+        val results = loadAllJobCardItemsOnIncmpleteJobCards(driver.passCode)
         return if (results is Results.Success<*>) {
             val jobCardItems = results.data as ArrayList<JobCardItem>
-            val filteredJobCardItems = jobCardItems.filter { it.driver?.id ?: -1 == driverId }
+            val filteredJobCardItems = jobCardItems.filter { it.driver?.id ?: -1 == driver.id }
 
             val jobCardList = if (filteredJobCardItems.isNullOrEmpty()) {
                 filteredJobCardItems.groupBy { it.jobCardNo }
@@ -37,8 +38,8 @@ class JobCardRepo {
         } else results
     }
 
-    suspend fun loadUnAssignedJobCards(): Results {
-        val results = loadAllJobCardItemsOnIncmpleteJobCards()
+    suspend fun loadUnAssignedJobCards(driver: Driver): Results {
+        val results = loadAllJobCardItemsOnIncmpleteJobCards(driver.passCode)
         return if (results is Results.Success<*>) {
             val jobCardItems = results.data as ArrayList<JobCardItem>
             val filteredJobCardItems = jobCardItems.filter { it.driver?.id ?: -1 == 0 }
@@ -51,9 +52,9 @@ class JobCardRepo {
                     jobCardItemList = it.value,
                     pendingContainers = it.value.count { !it.wasPickedUp })
             }
-            print(other.toJson())
+//            print(other.toJson())
 //            val jobCardList = if (filteredJobCardItems.isNullOrEmpty()) {
-//               val t =  filteredJobCardItems
+//               filteredJobCardItems
 //                    .groupBy { it.jobCardNo }
 //                    .map {
 //                        JobCard(
@@ -63,8 +64,6 @@ class JobCardRepo {
 //                            jobCardItemList = it.value,
 //                            pendingContainers = it.value.count { !it.wasPickedUp })
 //                    }
-//                print(t)
-//                t
 //            } else arrayListOf()
 
             Results.Success(data = ArrayList(other), code = Results.Success.CODE.LOAD_SUCCESS)
@@ -72,8 +71,8 @@ class JobCardRepo {
         } else results
     }
 
-    suspend fun loadAllJobCardItemsOnIncmpleteJobCards(): Results {
-        val url = "http://192.168.178.75:8081/namops_driver_portal/all_job_cards"
+    private suspend fun loadAllJobCardItemsOnIncmpleteJobCards(passCode: String): Results {
+        val url = "http://160.242.10.200:8081/namops_driver_portal/all_job_cards?passcode=$passCode"
         val client = OkHttpClient.Builder().build()
         val request = Request.Builder()
             .url(url)

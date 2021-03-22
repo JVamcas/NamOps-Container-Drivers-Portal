@@ -38,13 +38,13 @@ class JobCardViewModel : ViewModel() {
 
 
 
-    val allIncompleteJobCards = liveData {
-        emit(Results.Loading)
-        try {
-            emit(jobCardRepo.loadAllJobCardItemsOnIncmpleteJobCards())
-        } catch (e: Exception) {
-            e.printStackTrace()
-            emit(Results.Error(e))
-        }
-    }
+//    val allIncompleteJobCards = liveData {
+//        emit(Results.Loading)
+//        try {
+//            emit(jobCardRepo.loadAllJobCardItemsOnIncmpleteJobCards())
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//            emit(Results.Error(e))
+//        }
+//    }
 }

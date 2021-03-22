@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:padding="20dp">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/startLocationName_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            >
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/startLocationName"
+                editContent="@{``+trip.emptyTruckWeight}"
+                errorMsg="@{`Please input the weight.`}"
+                android:layout_width="fill_parent"
+                android:layout_height="match_parent"
+                android:hint="@string/truck_weight"
+                android:inputType="numberDecimal"
+                android:paddingBottom="9dp"
+                android:singleLine="true"
+                android:text="@={``+trip.emptyTruckWeight}" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/register"
+            style="@style/save_btn_outlined"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/register"
+            android:textAllCaps="false"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/startLocationName_layout" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+    <data>
+        <variable
+            name="trip"
+            type="com.pet001kambala.namopscontainers.model.Trip" />
+    </data>
+</layout>

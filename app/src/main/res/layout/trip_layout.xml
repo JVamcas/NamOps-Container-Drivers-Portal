@@ -1,16 +1,204 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+<layout
     xmlns:app="http://schemas.android.com/apk/res-auto"
-
+    xmlns:android="http://schemas.android.com/apk/res/android"
     >
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
+        android:elevation="10dp"
+        android:backgroundTint="#009688"
+        >
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            >
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@id/truck_avatar"
+                app:layout_constraintBottom_toTopOf="@id/sep_sec"
+                android:id="@+id/task_btn"
+                android:layout_marginBottom="10dp"
+                >
+                <com.google.android.material.textview.MaterialTextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/to_do_next"
+                    android:text="@string/to_do_next"
+                    android:textColor="@color/hint_color"
+                    android:textStyle="bold"
+                    android:textSize="17sp"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/weigh_empty_btn"
+                    style="@style/save_btn_outlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textAllCaps="false"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    android:visibility="@{trip.tripStatus == TripStatus.WEIGH_EMPTY? View.VISIBLE: View.GONE}"
+                    android:text="@string/weigh_empty"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/to_do_next"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/pickup_btn"
+                    style="@style/save_btn_outlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAllCaps="false"
+                    android:layout_marginEnd="5dp"
+                    android:visibility="@{trip.tripStatus == TripStatus.PICK_UP? View.VISIBLE: View.GONE}"
+                    android:textSize="16sp"
+                    android:text="@string/pick_up"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/to_do_next"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/weigh_full_bison_btn"
+                    style="@style/save_btn_outlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:layout_marginEnd="5dp"
+                    android:visibility="@{trip.tripStatus == TripStatus.BISON? View.VISIBLE: View.GONE}"
+                    android:text="@string/weigh_full_bison"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/to_do_next"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/weigh_full_bridge_btn"
+                    style="@style/save_btn_outlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:layout_marginEnd="5dp"
+                    android:visibility="@{trip.tripStatus == TripStatus.WEIGH_FULL? View.VISIBLE: View.GONE}"
+                    android:text="@string/weigh_full_bridge"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/to_do_next"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    />
+
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/drop_off_btn"
+                    style="@style/save_btn_outlined"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAllCaps="false"
+                    android:textSize="16sp"
+                    android:layout_marginEnd="5dp"
+                    android:visibility="@{trip.tripStatus == TripStatus.DROP_OFF? View.VISIBLE: View.GONE}"
+                    android:text="@string/drop_off"
+                    android:layout_marginTop="30dp"
+                    android:layout_marginBottom="30dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/to_do_next"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+            <ImageView
+                android:id="@+id/truck_avatar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="@string/user_avatar"
+                app:default_icon="@{R.drawable.default_truck}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:viewId="@{null}"
+                app:size="@{100}"
+                app:photoUrl="@{null}"
+                />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:background="@color/white"
+                android:id="@+id/sep_sec"
+                app:layout_constraintTop_toBottomOf="@id/truck_avatar"
+                app:layout_constraintBottom_toTopOf="@id/from_text"
+                />
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_marginTop="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Start: "
+                android:textSize="16sp"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:id="@+id/from_text"
+                app:layout_constraintTop_toBottomOf="@id/sep_sec"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{trip.startLocationName}"
+                android:id="@+id/startLocationName"
+                android:textSize="16sp"
+                android:textColor="@color/white"
+                app:layout_constraintStart_toEndOf="@id/from_text"
+                app:layout_constraintTop_toTopOf="@id/from_text"
+                app:layout_constraintBottom_toBottomOf="@id/from_text"
+                />
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginTop="10dp"
+                android:text="Drop-Off: "
+                android:textSize="16sp"
+                android:textColor="@color/white"
+                android:textStyle="bold"
+                android:id="@+id/to_text"
+                app:layout_constraintTop_toBottomOf="@id/from_text"
+                />
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{trip.dropOffLocationName}"
+                android:textSize="16sp"
+                android:id="@+id/dropOffLocationName"
+                android:textColor="@color/white"
+                app:layout_constraintTop_toTopOf="@id/to_text"
+                app:layout_constraintStart_toEndOf="@id/to_text"
+                app:layout_constraintBottom_toBottomOf="@id/to_text"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </com.google.android.material.card.MaterialCardView>
+    <data>
+        <import type="android.view.View"/>
+        <import type="com.pet001kambala.namopscontainers.model.TripStatus"/>
+       <import type="com.pet001kambala.namopscontainers.R"/>
+        <variable
+            name="trip"
+            type="com.pet001kambala.namopscontainers.model.Trip" />
+    </data>
+</layout>

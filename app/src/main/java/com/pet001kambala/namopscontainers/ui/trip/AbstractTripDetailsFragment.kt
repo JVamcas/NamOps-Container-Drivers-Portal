@@ -1,19 +1,24 @@
 package com.pet001kambala.namopscontainers.ui.trip
 
 import android.os.Bundle
+import android.view.View
+import androidx.fragment.app.activityViewModels
+import com.pet001kambala.namopscontainers.model.Driver
 import com.pet001kambala.namopscontainers.model.Trip
 import com.pet001kambala.namopscontainers.ui.AbstractFragment
 import com.pet001kambala.namopscontainers.utils.Const
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.convert
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-abstract class AbstractTripDetailsFragment: AbstractFragment() {
-
+abstract class AbstractTripDetailsFragment : AbstractFragment() {
+    val tripModel: TripViewModel by activityViewModels()
     lateinit var trip: Trip
+
+
     @ExperimentalCoroutinesApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        trip = Trip()
+        trip = Trip(driver = driver)
         arguments?.let {
             val json = it.getString(Const.TRIP)
             json?.let {
@@ -21,4 +26,5 @@ abstract class AbstractTripDetailsFragment: AbstractFragment() {
             }
         }
     }
+
 }

@@ -5,7 +5,8 @@ import androidx.databinding.BaseObservable
 
 @Keep
 abstract class AbstractModel(
-    open var id: Int = 0,
+    @Transient
+    open var id: Int? = null,
     @Transient
     open var photoUrl: String? = null
 ) : BaseObservable() {

@@ -20,6 +20,7 @@ import androidx.navigation.findNavController
 import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.ProgressbarBinding
 import com.pet001kambala.namopscontainers.databinding.WarningDialogBinding
+import com.pet001kambala.namopscontainers.model.Driver
 import com.pet001kambala.namopscontainers.ui.account.AccountViewModel
 import com.pet001kambala.namopscontainers.utils.Results
 import com.pet001kambala.namopscontainers.utils.Results.Error.CODE.*
@@ -33,6 +34,7 @@ abstract class AbstractFragment : Fragment() {
     lateinit var navController: NavController
     private lateinit var mProgressbarBinding: ProgressbarBinding
     val accountModel: AccountViewModel by activityViewModels()
+    val driver = Driver(firstName = "Sergio", lastName = "Figueiredo", passCode = "DR0001", id = 3)
 
     var currentAccount: Account? = null
 

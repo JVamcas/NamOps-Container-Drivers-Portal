@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.pet001kambala.namopscontainers.MainActivity
 import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.FragmentJobcardListBinding
+import com.pet001kambala.namopscontainers.model.Driver
 import com.pet001kambala.namopscontainers.model.JobCard
 import com.pet001kambala.namopscontainers.repo.JobCardRepo
 import com.pet001kambala.namopscontainers.ui.AbstractListFragment
@@ -55,7 +56,7 @@ class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHol
 
             if (isPreAssignedJobs) {
                 showProgressBar("Just a moment...")
-                val results = JobCardRepo().loadPreAssignedJobCards(4)
+                val results = JobCardRepo().loadPreAssignedJobCards(driver)
                 endProgressBar()
                 if (results is Results.Success<*>) {
                     val data = results.data as ArrayList<JobCard>
@@ -72,7 +73,7 @@ class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHol
 
             } else {
                 showProgressBar("Just a moment...")
-                val results = JobCardRepo().loadUnAssignedJobCards()
+                val results = JobCardRepo().loadUnAssignedJobCards(driver)
                 endProgressBar()
                 if (results is Results.Success<*>) {
                     val data = results.data as ArrayList<JobCard>

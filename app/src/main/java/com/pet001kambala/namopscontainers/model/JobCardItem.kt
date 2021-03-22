@@ -8,6 +8,7 @@ import java.time.LocalDateTime
  */
 @Keep
 data class JobCardItem(
+    override var id: Int?,
     val jobCardNo: String,
     val containerNo: String? = null,
     val containerSize: String? = null,

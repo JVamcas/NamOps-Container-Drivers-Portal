@@ -13,6 +13,24 @@
         <action
             android:id="@+id/action_nav_home_to_jobCardListFragment"
             app:destination="@id/taskListFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_updateTruckDetailsFragment"
+            app:destination="@id/updateTruckDetailsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_weighEmptyTruckFragment"
+            app:destination="@id/weighEmptyTruckFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_pickUpContainerFragment"
+            app:destination="@id/pickUpContainerFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_dropOffContainerFragment"
+            app:destination="@id/dropOffContainerFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_pickUpContainerFragment2"
+            app:destination="@id/pickUpContainerFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_weighFullContainerFragment"
+            app:destination="@id/weighFullContainerFragment" />
     </fragment>
     <fragment
         android:id="@+id/taskListFragment"
@@ -28,5 +46,30 @@
         android:name="com.pet001kambala.namopscontainers.ui.trip.NewTripFragment"
         android:label="Start New Trip"
         tools:layout="@layout/fragment_new_trip" />
+    <fragment
+        android:id="@+id/updateTruckDetailsFragment"
+        android:name="com.pet001kambala.namopscontainers.ui.trip.UpdateTruckDetailsFragment"
+        android:label="Update truck details"
+        tools:layout="@layout/fragment_update_truck_details" />
+    <fragment
+        android:id="@+id/weighEmptyTruckFragment"
+        android:name="com.pet001kambala.namopscontainers.WeighEmptyTruckFragment"
+        android:label="Weigh empty truck"
+        tools:layout="@layout/fragment_weigh_empty_truck" />
+    <fragment
+        android:id="@+id/pickUpContainerFragment"
+        android:name="com.pet001kambala.namopscontainers.PickUpContainerFragment"
+        android:label="Pick up container"
+        tools:layout="@layout/fragment_pick_up_container" />
+    <fragment
+        android:id="@+id/dropOffContainerFragment"
+        android:name="com.pet001kambala.namopscontainers.DropOffContainerFragment"
+        android:label="Drop off container"
+        tools:layout="@layout/fragment_drop_off_container" />
+    <fragment
+        android:id="@+id/weighFullContainerFragment"
+        android:name="com.pet001kambala.namopscontainers.WeighFullContainerFragment"
+        android:label="Weigh Loaded Truck"
+        tools:layout="@layout/fragment_weigh_full_container" />
 
 </navigation>

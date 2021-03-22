@@ -6,8 +6,9 @@ import androidx.annotation.Keep
 data class Driver(
     val firstName: String = "",
     val lastName: String = "",
-    val passCode: String = ""
-) : AbstractModel() {
+    val passCode: String = "",
+    override var id: Int?
+) : AbstractModel(id = id) {
 
 
     override fun equals(other: Any?): Boolean {

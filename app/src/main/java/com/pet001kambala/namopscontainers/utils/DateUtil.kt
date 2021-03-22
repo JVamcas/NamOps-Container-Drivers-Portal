@@ -1,8 +1,13 @@
 package com.pet001kambala.namopscontainers.utils
 
+import android.os.Build
 import android.text.format.DateFormat
+import androidx.annotation.RequiresApi
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.sql.Timestamp
 import java.util.*
 
 class DateUtil {
@@ -38,7 +43,15 @@ class DateUtil {
         fun fromLong(long: Long): String {
             return DateFormat.format("dd MMMM yyyy", Date(long)).toString()
         }
-
+        @RequiresApi(Build.VERSION_CODES.O)
+        fun LocalDateTime._24(): String{
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+            return this.format(formatter)
+        }
+        fun localDateToday(): LocalDateTime{
+            val date = Date()
+            return Timestamp(date.time).toLocalDateTime()
+        }
 
     }
 }

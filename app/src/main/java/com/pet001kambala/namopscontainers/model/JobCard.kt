@@ -1,6 +1,7 @@
 package com.pet001kambala.namopscontainers.model
 
 data class JobCard(
+    override var id: Int? = 0,
     val jobCardNo: String,
     val totalContainers: Int,
     var pendingContainers: Int,

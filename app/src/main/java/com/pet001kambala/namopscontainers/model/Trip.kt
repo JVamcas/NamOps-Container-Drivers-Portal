@@ -5,7 +5,8 @@ import java.time.LocalDateTime
 import com.pet001kambala.namopscontainers.BR
 
 data class Trip(
-    val driverId: Int? = null
+    val driver: Driver? = null,
+    override var id: Int? = null
 ) : AbstractModel() {
 
     /** truck and trailer info start **/
@@ -214,8 +215,7 @@ data class Trip(
 
     /** drop off location info end  **/
 
-
-    val tripStatus: TripStatus = TripStatus.START
+    var tripStatus: TripStatus = TripStatus.START
 }
 
 enum class TripStatus {

@@ -4,17 +4,23 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.viewModelScope
+import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.FragmentNewTripBinding
+import com.pet001kambala.namopscontainers.model.TripStatus
+import com.pet001kambala.namopscontainers.repo.TripRepo
+import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 
 class NewTripFragment : AbstractTripDetailsFragment() {
 
-    lateinit var binding : FragmentNewTripBinding
+    lateinit var binding: FragmentNewTripBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentNewTripBinding.inflate(inflater,container,false)
+        binding = FragmentNewTripBinding.inflate(inflater, container, false)
 
         return binding.root
     }
@@ -24,6 +30,26 @@ class NewTripFragment : AbstractTripDetailsFragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.trip = trip
 
+        //TODO check if there is truck and pre populate
 
+        //TODO if truck reg changed, load new odometer
+
+        binding.register.setOnClickListener {
+            trip.tripStatus = TripStatus.WEIGH_FULL
+            tripModel.createNewTrip(driver, trip).observe(viewLifecycleOwner) { result ->
+                when (result) {
+                    is Results.Loading -> showProgressBar("Creating new trip")
+                    is Results.Success<*> -> {
+                        endProgressBar()
+                        showToast("Success!")
+                        navController.popBackStack(R.id.homeFragment, false)
+                    }
+                    else -> {
+                        endProgressBar()
+                        parseRepoResults(result)
+                    }
+                }
+            }
+        }
     }
 }

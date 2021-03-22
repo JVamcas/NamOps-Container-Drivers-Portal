@@ -22,4 +22,12 @@
     <string name="truck_odo">Truck odometer reading</string>
     <string name="register">Save</string>
     <string name="current_location_name">Current Location Name</string>
+    <string name="weigh_empty">Weigh Empty</string>
+    <string name="pick_up">Pick Up</string>
+    <string name="weigh_full">Weigh Full</string>
+    <string name="drop_off">Drop-Off</string>
+    <string name="to_do_next">To Do Next</string>
+    <string name="weigh_full_bridge">Weigh Full [Weighbridge]</string>
+    <string name="weigh_full_bison">Weigh Full [Bison]</string>
+    <string name="truck_weight">Truck weight</string>
 </resources>
