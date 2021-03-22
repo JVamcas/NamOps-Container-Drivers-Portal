@@ -21,7 +21,9 @@ import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.ProgressbarBinding
 import com.pet001kambala.namopscontainers.databinding.WarningDialogBinding
 import com.pet001kambala.namopscontainers.model.Driver
+import com.pet001kambala.namopscontainers.model.Truck
 import com.pet001kambala.namopscontainers.ui.account.AccountViewModel
+import com.pet001kambala.namopscontainers.ui.trip.TripViewModel
 import com.pet001kambala.namopscontainers.utils.Results
 import com.pet001kambala.namopscontainers.utils.Results.Error.CODE.*
 import com.pet001kambala.namopscontainers.utils.Results.Success.CODE.*
@@ -35,6 +37,8 @@ abstract class AbstractFragment : Fragment() {
     private lateinit var mProgressbarBinding: ProgressbarBinding
     val accountModel: AccountViewModel by activityViewModels()
     val driver = Driver(firstName = "Sergio", lastName = "Figueiredo", passCode = "DR0001", id = 3)
+    var truck: Truck? = null
+    val tripModel: TripViewModel by activityViewModels()
 
     var currentAccount: Account? = null
 
@@ -58,6 +62,11 @@ abstract class AbstractFragment : Fragment() {
 ////                    navController.navigate(R.id.action_global_nav_auth)
 ////            }
 //        })
+        tripModel.currentTruck.observe(viewLifecycleOwner){
+            it?.let {
+                truck = it
+            }
+        }
     }
 
 

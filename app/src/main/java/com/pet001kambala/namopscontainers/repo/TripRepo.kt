@@ -1,21 +1,22 @@
 package com.pet001kambala.namopscontainers.repo
 
+import android.content.Context
+import androidx.room.*
 import com.google.gson.JsonParser
 import com.pet001kambala.namopscontainers.model.AbstractModel
 import com.pet001kambala.namopscontainers.model.Driver
 import com.pet001kambala.namopscontainers.model.Trip
+import com.pet001kambala.namopscontainers.model.Truck
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.toJson
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.withContext
 import okhttp3.FormBody
-import okhttp3.MultipartBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.apache.commons.csv.CSVFormat
 import java.io.StringReader
-import java.lang.Exception
 import kotlin.math.round
 
 class TripRepo {
@@ -41,7 +42,7 @@ class TripRepo {
                     client.newCall(request).execute()//wait for the results from the SERVER
                 val data = results.body?.string()
                 val jsonTree = JsonParser.parseString(data).asJsonObject
-                val writeResp = jsonTree.get("data").toString().replace("\"","")
+                val writeResp = jsonTree.get("data").toString().replace("\"", "")
 
                 if (writeResp == "Success")
                     Results.Success(data = arrayListOf(), code = Results.Success.CODE.WRITE_SUCCESS)
@@ -81,4 +82,75 @@ class TripRepo {
             "0.0"
         }
     }
+}
+
+// Annotates class to be a Room Database with a table (entity) of the Word class
+@Database(entities = [Truck::class, Trip::class, Driver::class], version = 1, exportSchema = false)
+abstract class TripDatabase : RoomDatabase() {
+
+    abstract fun tripDao(): CurrentTripDao
+
+    companion object {
+        // Singleton prevents multiple instances of database opening at the
+        // same time.
+        @Volatile
+        private var INSTANCE: TripDatabase? = null
+
+        fun getDatabase(context: Context): TripDatabase {
+            // if the INSTANCE is not null, then return it,
+            // if it is, then create the database
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    TripDatabase::class.java,
+                    "Current Trip Database"
+                ).build()
+                INSTANCE = instance
+                // return instance
+                instance
+            }
+        }
+    }
+}
+
+@Dao
+interface CurrentTripDao {
+    @Insert
+    suspend fun insertTruck(truck: Truck)
+
+    @Update
+    suspend fun updateTruck(truck: Truck)
+
+    @Query("delete from Truck")
+    suspend fun clearTruckTable()
+
+    @Query("select * from Truck limit 1")
+    suspend fun loadCurrentTruck(): Truck?
+
+    // trip room table ops
+
+    @Insert
+    suspend fun insertTrip(trip: Trip)
+
+    @Update
+    suspend fun updateTrip(trip: Trip)
+
+    @Query("delete from Trip")
+    suspend fun clearTripTable()
+
+    @Query("select * from Trip limit 1")
+    suspend fun loadCurrentTrip(): Trip?
+
+    // driver room table ops
+    @Insert
+    suspend fun insertDriver(driver: Driver)
+
+    @Update
+    suspend fun updateDriver(driver: Driver)
+
+    @Query("delete from Driver")
+    suspend fun clearDriverTable()
+
+    @Query("select * from Driver limit 1")
+    suspend fun loadCurrentDriver(): Driver?
 }

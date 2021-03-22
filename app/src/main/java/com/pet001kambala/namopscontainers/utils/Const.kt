@@ -6,6 +6,7 @@ internal interface Const {
         val TRIP: String = "Trip"
         val IS_PRE_ASSIGNED: String = "isPreAssigned"
         const val TOOLBAR_TITLE: String = "toolbar title"
+        const val TRUCK: String = "truck"
         const val ICON_PATH: String = "icon path"
 
         const val SQUARE: String = "square"

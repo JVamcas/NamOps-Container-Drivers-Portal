@@ -30,4 +30,5 @@
     <string name="weigh_full_bridge">Weigh Full [Weighbridge]</string>
     <string name="weigh_full_bison">Weigh Full [Bison]</string>
     <string name="truck_weight">Truck weight</string>
+    <string name="my_truck">My Truck</string>
 </resources>

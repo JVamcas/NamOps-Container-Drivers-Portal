@@ -24,6 +24,7 @@
                 android:layout_marginBottom="20dp"
                 android:backgroundTint="@color/hint_color"
                 android:padding="20dp"
+                android:visibility="@{trip == null? View.VISIBLE: View.GONE}"
                 android:text="@string/pre_assigned"
                 android:textColor="@color/white"
                 android:textStyle="bold"
@@ -39,6 +40,7 @@
                 android:layout_marginTop="20dp"
                 android:backgroundTint="@color/colorPrimaryDark"
                 android:padding="20dp"
+                android:visibility="@{trip == null? View.VISIBLE: View.GONE}"
                 android:text="@string/un_assigned"
                 android:textColor="@color/white"
                 android:textStyle="bold"
@@ -82,11 +84,8 @@
                 app:layout_constraintTop_toBottomOf="@id/text_sep" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </FrameLayout>
-
     <data>
-
         <import type="android.view.View" />
-
         <variable
             name="trip"
             type="com.pet001kambala.namopscontainers.model.Trip" />

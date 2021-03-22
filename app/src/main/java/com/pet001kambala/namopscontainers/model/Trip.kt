@@ -1,11 +1,21 @@
 package com.pet001kambala.namopscontainers.model
 
 import androidx.databinding.Bindable
-import java.time.LocalDateTime
+import androidx.room.*
 import com.pet001kambala.namopscontainers.BR
+import com.pet001kambala.namopscontainers.utils.LocalDateConverter
+import com.pet001kambala.namopscontainers.utils.TripStatusConverter
+import java.time.LocalDateTime
 
+@Entity
 data class Trip(
-    val driver: Driver? = null,
+    @Embedded val driver: Driver? = null,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "driverId"
+    )
+
+    @PrimaryKey(autoGenerate = true)
     override var id: Int? = null
 ) : AbstractModel() {
 
@@ -39,6 +49,7 @@ data class Trip(
 
     /** truck and trailer info end **/
 
+    @TypeConverters(LocalDateConverter::class)
     var designatePickUpDate: LocalDateTime? = null
     /**designated container pick up date*/
 
@@ -75,6 +86,7 @@ data class Trip(
     /** container weighing info start **/
     var useBison: Boolean = false /*whether or not merchandise will be weigh by bison*/
     var useWeighBridge: Boolean = false /*whether or not merch will be weigh at the weighbridge*/
+    @TypeConverters(LocalDateConverter::class)
     var dateWeightBridgeEmpty: LocalDateTime? = null
     @Bindable
     var emptyTruckWeight: Long? = 0L
@@ -84,6 +96,7 @@ data class Trip(
                 notifyPropertyChanged(BR.emptyTruckWeight)
             }
         }
+    @TypeConverters(LocalDateConverter::class)
     var dateWeightBridgeFull: LocalDateTime? = null
 
     @Bindable
@@ -99,10 +112,12 @@ data class Trip(
 
     /** container scanning info start **/
     var scanContainer: Boolean = false /*whether or not the container must be thermally scanned*/
+    @TypeConverters(LocalDateConverter::class)
     var containerScanDate: LocalDateTime? = null
     /** container scanning info end **/
 
     /** container pick up info start **/
+    @TypeConverters(LocalDateConverter::class)
     var actualPickUpDate: LocalDateTime? = null
     var pickUpLocationGPS: String? = null
 
@@ -215,6 +230,7 @@ data class Trip(
 
     /** drop off location info end  **/
 
+    @TypeConverters(TripStatusConverter::class)
     var tripStatus: TripStatus = TripStatus.START
 }
 

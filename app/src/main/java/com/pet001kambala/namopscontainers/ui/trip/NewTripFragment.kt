@@ -32,9 +32,18 @@ class NewTripFragment : AbstractTripDetailsFragment() {
 
         //TODO check if there is truck and pre populate
 
-        //TODO if truck reg changed, load new odometer
+        truck?.let {
+            //load truck odometer
+        }
 
         binding.register.setOnClickListener {
+
+            trip.apply {
+                truckReg = truck!!.truckReg
+                firstTrailerReg = truck!!.firstTrailerReg
+                secondTrailerReg = truck?.secondTrailerReg
+            }
+
             trip.tripStatus = TripStatus.WEIGH_FULL
             tripModel.createNewTrip(driver, trip).observe(viewLifecycleOwner) { result ->
                 when (result) {

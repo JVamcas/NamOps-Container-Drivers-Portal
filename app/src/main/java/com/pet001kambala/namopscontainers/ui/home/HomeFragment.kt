@@ -16,7 +16,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 class HomeFragment : AbstractFragment() {
 
     private lateinit var homeViewModel: HomeViewModel
-    private val tripModel: TripViewModel by activityViewModels()
     private lateinit var binding: FragmentHomeBinding
 
     override fun onCreateView(

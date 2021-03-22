@@ -1,10 +1,17 @@
 package com.pet001kambala.namopscontainers.model
 
 import androidx.databinding.Bindable
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.pet001kambala.namopscontainers.BR
 
-class Truck : AbstractModel(){
-    /** truck and trailer info start **/
+@Entity
+class Truck(
+    @PrimaryKey(autoGenerate = true)
+    override var id: Int? = null
+) : AbstractModel(){
+
+
     @Bindable
     var truckReg: String? = null
         set(value) {
