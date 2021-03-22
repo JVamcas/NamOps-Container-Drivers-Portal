@@ -15,6 +15,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.pet001kambala.namopscontainers.R
@@ -23,11 +24,14 @@ import com.pet001kambala.namopscontainers.databinding.WarningDialogBinding
 import com.pet001kambala.namopscontainers.model.Driver
 import com.pet001kambala.namopscontainers.model.Truck
 import com.pet001kambala.namopscontainers.ui.account.AccountViewModel
+import com.pet001kambala.namopscontainers.ui.home.HomeFragment
+import com.pet001kambala.namopscontainers.ui.trip.AbstractTripDetailsFragment
 import com.pet001kambala.namopscontainers.ui.trip.TripViewModel
 import com.pet001kambala.namopscontainers.utils.Results
 import com.pet001kambala.namopscontainers.utils.Results.Error.CODE.*
 import com.pet001kambala.namopscontainers.utils.Results.Success.CODE.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class AbstractFragment : Fragment() {
@@ -62,9 +66,27 @@ abstract class AbstractFragment : Fragment() {
 ////                    navController.navigate(R.id.action_global_nav_auth)
 ////            }
 //        })
-        tripModel.currentTruck.observe(viewLifecycleOwner){
+        tripModel.currentTruck.observe(viewLifecycleOwner) {
             it?.let {
                 truck = it
+            }
+        }
+
+        if (this is AbstractTripDetailsFragment || this is HomeFragment) {
+            tripModel.loadCurrentTrip().observe(viewLifecycleOwner) { result ->
+                when (result) {
+                    is Results.Loading -> showProgressBar("Loading current trip info...")
+                    is Results.Success<*> -> {
+                        endProgressBar()
+                        if (truck == null)
+                            navController.navigate(R.id.action_newTripFragment_to_updateTruckDetailsFragment)
+
+                    }
+                    else -> {
+                        endProgressBar()
+                        parseRepoResults(result)
+                    }
+                }
             }
         }
     }

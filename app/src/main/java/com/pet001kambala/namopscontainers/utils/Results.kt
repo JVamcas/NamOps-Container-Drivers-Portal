@@ -9,11 +9,6 @@ import java.net.SocketTimeoutException
  * Represent results of an async operation
  */
 sealed class Results {
-
-    companion object {
-        fun loading() = Loading
-    }
-
     object Loading : Results()
 
     class Success<T : AbstractModel>(
@@ -81,7 +76,6 @@ sealed class Results {
             is AbstractModel.NoConnectionException -> CODE.NO_CONNECTION
             is AbstractModel.NullConnectionDetailsException -> CODE.NULL_CONNECTION_DETAILS
             is ConnectException -> CODE.NO_CONNECTION
-
             else -> CODE.UNKNOWN
         }
         var seen: Boolean = false

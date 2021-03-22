@@ -5,7 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.pet001kambala.namopscontainers.databinding.FragmentWeighEmptyTruckBinding
+import com.pet001kambala.namopscontainers.model.TripStatus
 import com.pet001kambala.namopscontainers.utils.DateUtil
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.copyOf
+import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 class WeighEmptyTruckFragment : AbstractTripDetailsFragment() {
@@ -29,7 +32,21 @@ class WeighEmptyTruckFragment : AbstractTripDetailsFragment() {
 
         binding.register.setOnClickListener {
             trip.dateWeightBridgeEmpty = DateUtil.localDateToday()
-
+            val tripCopy = trip.copyOf()!!
+            tripCopy.tripStatus = TripStatus.PICK_UP
+            tripModel.updateTripDetails(driver, tripCopy).observe(viewLifecycleOwner) { results ->
+                when (results) {
+                    is Results.Loading -> showProgressBar("Saving empty-truck weight...")
+                    is Results.Success<*> -> {
+                        endProgressBar()
+                        showToast("Saved.")
+                    }
+                    else -> {
+                        endProgressBar()
+                        parseRepoResults(results)
+                    }
+                }
+            }
         }
     }
 }

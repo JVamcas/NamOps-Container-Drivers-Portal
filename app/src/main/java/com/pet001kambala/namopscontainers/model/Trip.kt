@@ -3,21 +3,23 @@ package com.pet001kambala.namopscontainers.model
 import androidx.databinding.Bindable
 import androidx.room.*
 import com.pet001kambala.namopscontainers.BR
+import com.pet001kambala.namopscontainers.utils.DriverConverter
 import com.pet001kambala.namopscontainers.utils.LocalDateConverter
 import com.pet001kambala.namopscontainers.utils.TripStatusConverter
 import java.time.LocalDateTime
 
 @Entity
 data class Trip(
-    @Embedded val driver: Driver? = null,
-    @Relation(
-        parentColumn = "id",
-        entityColumn = "driverId"
-    )
 
     @PrimaryKey(autoGenerate = true)
     override var id: Int? = null
+
+
+
 ) : AbstractModel() {
+
+    @TypeConverters(DriverConverter::class)
+    var driver: Driver? = null
 
     /** truck and trailer info start **/
     @Bindable

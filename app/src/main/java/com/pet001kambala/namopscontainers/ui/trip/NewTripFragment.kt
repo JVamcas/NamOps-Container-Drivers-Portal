@@ -44,7 +44,7 @@ class NewTripFragment : AbstractTripDetailsFragment() {
                 secondTrailerReg = truck?.secondTrailerReg
             }
 
-            trip.tripStatus = TripStatus.WEIGH_FULL
+            trip.tripStatus = TripStatus.WEIGH_EMPTY
             tripModel.createNewTrip(driver, trip).observe(viewLifecycleOwner) { result ->
                 when (result) {
                     is Results.Loading -> showProgressBar("Creating new trip")

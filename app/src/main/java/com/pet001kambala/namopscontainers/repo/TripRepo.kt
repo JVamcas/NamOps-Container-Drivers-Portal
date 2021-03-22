@@ -1,5 +1,6 @@
 package com.pet001kambala.namopscontainers.repo
 
+import android.app.Application
 import android.content.Context
 import androidx.room.*
 import com.google.gson.JsonParser
@@ -9,34 +10,45 @@ import com.pet001kambala.namopscontainers.model.Trip
 import com.pet001kambala.namopscontainers.model.Truck
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.toJson
 import com.pet001kambala.namopscontainers.utils.Results
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.apache.commons.csv.CSVFormat
 import java.io.StringReader
 import kotlin.math.round
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.tasks.await
 
-class TripRepo {
+class TripRepo(val app: Application) {
+
+    //order
+    //1. write -> local then backend
+    //2. read -> backend then populate to local
+    //3. if all fails read or write from/to local
 
     var baseUrl: String = "http://160.242.10.200:8081/namops_driver_portal"
     private val client = OkHttpClient.Builder().build()
+    private val tripDao by lazy { TripDatabase.getDatabase(app).tripDao() }
 
     suspend fun createNewTrip(passCode: String, trip: Trip): Results {
-
-        val requestBody = FormBody.Builder()
-            .add("passcode", passCode)
-            .add("trip", trip.toJson())
-            .build()
-
-        val request = Request.Builder()
-            .url("$baseUrl/trip")
-            .post(requestBody)
-            .build()
-
         return try {
+            //1. first write to room database
+            tripDao.insertTrip(trip = trip)
+
+            //2. then to repository
+            val requestBody = FormBody.Builder()
+                .add("passcode", passCode)
+                .add("trip", trip.toJson())
+                .build()
+
+            val request = Request.Builder()
+                .url("$baseUrl/trip")
+                .post(requestBody)
+                .build()
+
             withContext(Dispatchers.IO) {
                 val results =
                     client.newCall(request).execute()//wait for the results from the SERVER
@@ -48,7 +60,60 @@ class TripRepo {
                     Results.Success(data = arrayListOf(), code = Results.Success.CODE.WRITE_SUCCESS)
                 else Results.Error(AbstractModel.ServerException())
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Results.Error(e)
+        }
+    }
 
+    suspend fun updateTripDetails(passCode: String,trip: Trip): Results{
+        //todo if entry not exist at backed, insert it
+
+        return try {
+            //1. first write to room database
+            tripDao.updateTrip(trip = trip)
+
+            //2. then to repository
+            val requestBody = FormBody.Builder()
+                .add("passcode", passCode)
+                .add("trip", trip.toJson())
+                .build()
+
+            val request = Request.Builder()
+                .url("$baseUrl/trip_update")
+                .post(requestBody)
+                .build()
+
+            withContext(Dispatchers.IO) {
+                val results =
+                    client.newCall(request).execute()//wait for the results from the SERVER
+                val data = results.body?.string()
+                val jsonTree = JsonParser.parseString(data).asJsonObject
+                val writeResp = jsonTree.get("data").toString().replace("\"", "")
+
+                if (writeResp == "Success")
+                    Results.Success(data = arrayListOf(), code = Results.Success.CODE.UPDATE_SUCCESS)
+                else Results.Error(AbstractModel.ServerException())
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Results.Error(e)
+        }
+    }
+
+    suspend fun loadTripInfo(): Results {
+        return try {
+            withContext(Dispatchers.IO) {
+                val deferredRecords = listOf(
+                     //TODO should be loaded from the backend unless if there is no network
+                    // TODO then saved to local repo
+
+                    async { tripDao.loadCurrentTrip() },
+                    async { tripDao.loadCurrentTruck() }
+                )
+                val data = deferredRecords.awaitAll().filterNotNull() as ArrayList<AbstractModel>
+                Results.Success(code = Results.Success.CODE.LOAD_SUCCESS,data = data)
+            }
         } catch (e: Exception) {
             e.printStackTrace()
             Results.Error(e)

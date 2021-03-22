@@ -35,11 +35,11 @@ class TruckRegistrationDetailsFragment : AbstractTripDetailsFragment() {
             showProgressBar("Loading current truck...")
             val truck = tripModel.tripDao.loadCurrentTruck()
             endProgressBar()
-            binding.truck = truck
+            binding.truck = truck?: Truck()
         }
+
         binding.register.setOnClickListener {
             val observer = if (truck == null) {
-                binding.truck = Truck()
                 tripModel.addTruck(binding.truck!!)
             } else
                 tripModel.updateTruck(binding.truck!!)

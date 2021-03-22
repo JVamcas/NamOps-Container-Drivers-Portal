@@ -12,7 +12,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 class TripViewModel(app: Application) : AndroidViewModel(app) {
 
-    private val tripRepo = TripRepo()
+    private val tripRepo = TripRepo(app)
     private var _currentTrip = MutableLiveData<Trip>()
     private var _currentTruck = MutableLiveData<Truck>()
     lateinit var oPLiveData: LiveData<Results>
@@ -30,6 +30,22 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
             emit(Results.Loading)
             try {
                 val results = tripRepo.createNewTrip(driver.passCode, trip)
+                if (results is Results.Success<*>)
+                    _currentTrip.value = trip
+                emit(results)
+            } catch (e: Exception) {
+                emit(Results.Error(e))
+            }
+        }
+        return oPLiveData
+    }
+
+    @ExperimentalCoroutinesApi
+    fun updateTripDetails(driver: Driver, trip: Trip): LiveData<Results> {
+        oPLiveData = liveData {
+            emit(Results.Loading)
+            try {
+                val results = tripRepo.updateTripDetails(driver.passCode, trip)
                 if (results is Results.Success<*>)
                     _currentTrip.value = trip
                 emit(results)
@@ -75,6 +91,26 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
                     Results.Success<Truck>(code = Results.Success.CODE.UPDATE_SUCCESS)
                 )
                 updateTruckDetails(truck)
+            } catch (e: Exception) {
+                Results.Error(e)
+            }
+        }
+        return oPLiveData
+    }
+    fun loadCurrentTrip(): LiveData<Results>{
+        oPLiveData = liveData {
+            emit(Results.Loading)
+            try {
+                val results =  tripRepo.loadTripInfo()
+                if( results is Results.Success<*>){
+                    if(!results.data.isNullOrEmpty()){
+                        _currentTrip.value = results.data.firstOrNull() as? Trip
+                        _currentTruck.value = if(results.data.size >=2)results.data[1] as Truck
+                        else if(results.data.size == 1) results.data[0] as Truck else null
+                    }
+                }
+                emit(results)
+
             } catch (e: Exception) {
                 Results.Error(e)
             }

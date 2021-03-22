@@ -51,5 +51,13 @@ class HomeFragment : AbstractFragment() {
                 binding.trip = it
             }
         }
+        with(binding.tripLayout) {
+            weighEmptyBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_weighEmptyTruckFragment) }
+            pickupBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_pickUpContainerFragment) }
+
+            weighFullBisonBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_weighFullContainerFragment) }
+            weighFullBridgeBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_weighFullContainerFragment) }
+            dropOffBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_dropOffContainerFragment) }
+        }
     }
 }
