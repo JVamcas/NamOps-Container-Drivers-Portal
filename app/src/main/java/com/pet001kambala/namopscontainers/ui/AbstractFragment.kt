@@ -73,14 +73,13 @@ abstract class AbstractFragment : Fragment() {
         }
 
         if (this is AbstractTripDetailsFragment || this is HomeFragment) {
-            tripModel.loadCurrentTrip().observe(viewLifecycleOwner) { result ->
+            tripModel.loadCurrentTrip(driver).observe(viewLifecycleOwner) { result ->
                 when (result) {
                     is Results.Loading -> showProgressBar("Loading current trip info...")
                     is Results.Success<*> -> {
                         endProgressBar()
                         if (truck == null)
                             navController.navigate(R.id.action_newTripFragment_to_updateTruckDetailsFragment)
-
                     }
                     else -> {
                         endProgressBar()

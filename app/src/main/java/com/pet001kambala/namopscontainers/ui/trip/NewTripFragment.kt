@@ -4,14 +4,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.viewModelScope
 import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.FragmentNewTripBinding
 import com.pet001kambala.namopscontainers.model.TripStatus
-import com.pet001kambala.namopscontainers.repo.TripRepo
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 
 class NewTripFragment : AbstractTripDetailsFragment() {
 
@@ -28,7 +25,7 @@ class NewTripFragment : AbstractTripDetailsFragment() {
     @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.trip = trip
+        binding.trip = localTrip.trip
 
         //TODO check if there is truck and pre populate
 
@@ -38,14 +35,14 @@ class NewTripFragment : AbstractTripDetailsFragment() {
 
         binding.register.setOnClickListener {
 
-            trip.apply {
+            localTrip.trip?.apply {
                 truckReg = truck!!.truckReg
                 firstTrailerReg = truck!!.firstTrailerReg
                 secondTrailerReg = truck?.secondTrailerReg
             }
 
-            trip.tripStatus = TripStatus.WEIGH_EMPTY
-            tripModel.createNewTrip(driver, trip).observe(viewLifecycleOwner) { result ->
+            localTrip.trip?.tripStatus = TripStatus.WEIGH_EMPTY
+            tripModel.createNewTrip(driver, localTrip).observe(viewLifecycleOwner) { result ->
                 when (result) {
                     is Results.Loading -> showProgressBar("Creating new trip")
                     is Results.Success<*> -> {

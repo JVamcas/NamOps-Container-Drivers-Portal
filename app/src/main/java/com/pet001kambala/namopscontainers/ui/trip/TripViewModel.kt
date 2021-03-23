@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.*
 import com.pet001kambala.namopscontainers.model.Driver
 import com.pet001kambala.namopscontainers.model.Trip
+import com.pet001kambala.namopscontainers.model.LocalTrip
 import com.pet001kambala.namopscontainers.model.Truck
 import com.pet001kambala.namopscontainers.repo.TripDatabase
 import com.pet001kambala.namopscontainers.repo.TripRepo
@@ -13,11 +14,11 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 class TripViewModel(app: Application) : AndroidViewModel(app) {
 
     private val tripRepo = TripRepo(app)
-    private var _currentTrip = MutableLiveData<Trip>()
+    private var _currentTrip = MutableLiveData<LocalTrip>()
     private var _currentTruck = MutableLiveData<Truck>()
     lateinit var oPLiveData: LiveData<Results>
 
-    val currentTrip: LiveData<Trip> = _currentTrip
+    val currentLocalTrip: LiveData<LocalTrip> = _currentTrip
     val currentTruck: LiveData<Truck> = _currentTruck
 
     private val db by lazy { TripDatabase.getDatabase(app.baseContext) }
@@ -25,13 +26,15 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
 
 
     @ExperimentalCoroutinesApi
-    fun createNewTrip(driver: Driver, trip: Trip): LiveData<Results> {
+    fun createNewTrip(driver: Driver, localTrip: LocalTrip): LiveData<Results> {
         oPLiveData = liveData {
             emit(Results.Loading)
             try {
-                val results = tripRepo.createNewTrip(driver.passCode, trip)
-                if (results is Results.Success<*>)
-                    _currentTrip.value = trip
+                val results = tripRepo.createNewTrip(driver.passCode, localTrip)
+                if (results is Results.Success<*>) {
+                    val data = results.data?.firstOrNull()
+                    _currentTrip.value = data as? LocalTrip
+                }
                 emit(results)
             } catch (e: Exception) {
                 emit(Results.Error(e))
@@ -41,13 +44,15 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     @ExperimentalCoroutinesApi
-    fun updateTripDetails(driver: Driver, trip: Trip): LiveData<Results> {
+    fun updateTripDetails(driver: Driver, localTrip: LocalTrip): LiveData<Results> {
         oPLiveData = liveData {
             emit(Results.Loading)
             try {
-                val results = tripRepo.updateTripDetails(driver.passCode, trip)
-                if (results is Results.Success<*>)
-                    _currentTrip.value = trip
+                val results = tripRepo.updateTripDetails(driver.passCode, localTrip)
+                if (results is Results.Success<*>) {
+                    val data = results.data?.firstOrNull()
+                    _currentTrip.value = data as? LocalTrip
+                }
                 emit(results)
             } catch (e: Exception) {
                 emit(Results.Error(e))
@@ -58,9 +63,11 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
 
     private fun updateTruckDetails(truck: Truck) {
         _currentTrip.value = _currentTrip.value?.apply { //in case there's a trip active
-            truckReg = truck.truckReg
-            firstTrailerReg = truck.firstTrailerReg
-            secondTrailerReg = truck.secondTrailerReg
+            trip?.apply {
+                truckReg = truck.truckReg
+                firstTrailerReg = truck.firstTrailerReg
+                secondTrailerReg = truck.secondTrailerReg
+            }
         }
         //global truck
         _currentTruck.value = truck
@@ -97,16 +104,17 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
         }
         return oPLiveData
     }
-    fun loadCurrentTrip(): LiveData<Results>{
+
+    fun loadCurrentTrip(driver: Driver): LiveData<Results> {
         oPLiveData = liveData {
             emit(Results.Loading)
             try {
-                val results =  tripRepo.loadTripInfo()
-                if( results is Results.Success<*>){
-                    if(!results.data.isNullOrEmpty()){
-                        _currentTrip.value = results.data.firstOrNull() as? Trip
-                        _currentTruck.value = if(results.data.size >=2)results.data[1] as Truck
-                        else if(results.data.size == 1) results.data[0] as Truck else null
+                val results = tripRepo.loadTripInfo(driver.passCode)
+                if (results is Results.Success<*>) {
+                    if (!results.data.isNullOrEmpty()) {
+                        _currentTrip.value =
+                            results.data.filterIsInstance<LocalTrip>().firstOrNull()
+                        _currentTruck.value = results.data.filterIsInstance<Truck>().firstOrNull()
                     }
                 }
                 emit(results)

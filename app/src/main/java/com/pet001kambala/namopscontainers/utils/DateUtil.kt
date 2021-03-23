@@ -1,8 +1,6 @@
 package com.pet001kambala.namopscontainers.utils
 
 import android.text.format.DateFormat
-import androidx.room.TypeConverter
-import java.sql.Timestamp
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.time.LocalDateTime
@@ -13,8 +11,8 @@ import java.util.*
 class DateUtil {
     companion object {
         const val DATE_FORMAT = "yyyy_MM_dd HH_mm_ss"
-        var ICON_PATH_PATTERN = ".*(\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}).*"
-        val INCUBATION_TIME = 86400000 * 14
+        const val LOCAL_DATE_FORMAT = ""
+
 
         fun today(): Date {
             return Date()
@@ -30,18 +28,6 @@ class DateUtil {
             } catch (ignore: ParseException) {
             }
             return null
-        }
-
-        fun getDate(dateStr: String): String {
-            return dateStr.replace(".*(\\d{4}-\\d{2}-\\d{2}).*".toRegex(), "$1")
-        }
-
-        fun getTime(dateStr: String): String {
-            return dateStr.replace(".*(\\d{2}:\\d{2}:\\d{2}).*".toRegex(), "$1")
-        }
-
-        fun fromLong(long: Long): String {
-            return DateFormat.format("dd MMMM yyyy", Date(long)).toString()
         }
 
         fun LocalDateTime._24(): String {

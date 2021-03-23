@@ -4,12 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.activityViewModels
 import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.FragmentHomeBinding
-import com.pet001kambala.namopscontainers.model.Trip
 import com.pet001kambala.namopscontainers.ui.AbstractFragment
-import com.pet001kambala.namopscontainers.ui.trip.TripViewModel
 import com.pet001kambala.namopscontainers.utils.Const
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -46,9 +43,9 @@ class HomeFragment : AbstractFragment() {
 
         }
 
-        tripModel.currentTrip.observe(viewLifecycleOwner) {
+        tripModel.currentLocalTrip.observe(viewLifecycleOwner) {
             it?.let {
-                binding.trip = it
+                binding.trip = it.trip
             }
         }
         with(binding.tripLayout) {
@@ -59,5 +56,9 @@ class HomeFragment : AbstractFragment() {
             weighFullBridgeBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_weighFullContainerFragment) }
             dropOffBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_dropOffContainerFragment) }
         }
+    }
+
+    override fun onBackClick() {
+        requireActivity().finish()
     }
 }

@@ -6,16 +6,53 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.pet001kambala.namopscontainers.R
+import com.pet001kambala.namopscontainers.databinding.FragmentNewTripBinding
+import com.pet001kambala.namopscontainers.model.TripStatus
+import com.pet001kambala.namopscontainers.utils.DateUtil
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.copyOf
+import com.pet001kambala.namopscontainers.utils.Results
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 class PickUpContainerFragment : AbstractTripDetailsFragment() {
 
 
+    lateinit var binding: FragmentNewTripBinding
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_pick_up_container, container, false)
+        binding = FragmentNewTripBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
+    @ExperimentalCoroutinesApi
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        binding.trip = localTrip.trip
+
+        binding.register.setOnClickListener {
+
+            localTrip.trip!!.actualPickUpDate = DateUtil.localDateToday()
+            val localTripCopy = localTrip.copyOf()!!
+            localTripCopy.trip!!.tripStatus = if(localTrip.trip?.useBison == true) TripStatus.BISON else TripStatus.WEIGH_FULL
+
+            tripModel.updateTripDetails(driver, localTripCopy).observe(viewLifecycleOwner) { results ->
+                when (results) {
+                    is Results.Loading -> showProgressBar("Saving...")
+                    is Results.Success<*> -> {
+                        endProgressBar()
+                        showToast("Saved.")
+                        navController.popBackStack()
+                    }
+                    else -> {
+                        endProgressBar()
+                        parseRepoResults(results)
+                    }
+                }
+            }
+        }
+    }
 }

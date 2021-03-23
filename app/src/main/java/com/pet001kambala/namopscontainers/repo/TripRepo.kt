@@ -4,10 +4,8 @@ import android.app.Application
 import android.content.Context
 import androidx.room.*
 import com.google.gson.JsonParser
-import com.pet001kambala.namopscontainers.model.AbstractModel
-import com.pet001kambala.namopscontainers.model.Driver
-import com.pet001kambala.namopscontainers.model.Trip
-import com.pet001kambala.namopscontainers.model.Truck
+import com.pet001kambala.namopscontainers.model.*
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.convert
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.toJson
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.*
@@ -17,31 +15,24 @@ import okhttp3.Request
 import org.apache.commons.csv.CSVFormat
 import java.io.StringReader
 import kotlin.math.round
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.tasks.await
 
 class TripRepo(val app: Application) {
-
-    //order
-    //1. write -> local then backend
-    //2. read -> backend then populate to local
-    //3. if all fails read or write from/to local
 
     var baseUrl: String = "http://160.242.10.200:8081/namops_driver_portal"
     private val client = OkHttpClient.Builder().build()
     private val tripDao by lazy { TripDatabase.getDatabase(app).tripDao() }
 
-    suspend fun createNewTrip(passCode: String, trip: Trip): Results {
+    /**
+     * 1. First write to the backend persist returned trip to the local db
+     * 2. If backend fail, write to local and set [LocalTrip.awaitingNetwork] true
+     */
+    suspend fun createNewTrip(passCode: String, localTrip: LocalTrip): Results {
         return try {
-            //1. first write to room database
-            tripDao.insertTrip(trip = trip)
 
-            //2. then to repository
+            //1. first write to the repository
             val requestBody = FormBody.Builder()
                 .add("passcode", passCode)
-                .add("trip", trip.toJson())
+                .add("trip", localTrip.trip.toJson())
                 .build()
 
             val request = Request.Builder()
@@ -54,65 +45,130 @@ class TripRepo(val app: Application) {
                     client.newCall(request).execute()//wait for the results from the SERVER
                 val data = results.body?.string()
                 val jsonTree = JsonParser.parseString(data).asJsonObject
-                val writeResp = jsonTree.get("data").toString().replace("\"", "")
+                val writeResp = jsonTree.get("Status").toString().replace("\"", "")
 
-                if (writeResp == "Success")
-                    Results.Success(data = arrayListOf(), code = Results.Success.CODE.WRITE_SUCCESS)
-                else Results.Error(AbstractModel.ServerException())
+                if (writeResp == "Success") {
+                    val jsonData = jsonTree.get("data").toString()
+                    val trip = jsonData.convert<Trip>()
+                    localTrip.trip = trip
+                    localTrip.awaitingNetwork = false
+
+                    tripDao.insertTrip(localTrip = localTrip)
+
+                    Results.Success(
+                        data = arrayListOf(localTrip),
+                        code = Results.Success.CODE.WRITE_SUCCESS
+                    )
+                } else Results.Error(AbstractModel.ServerException())
             }
         } catch (e: Exception) {
+            try {
+                localTrip.awaitingNetwork = true
+                tripDao.insertTrip(localTrip)
+            } catch (e: Exception) {
+                //should not come here
+                e.printStackTrace()
+                Results.Error(e)
+            }
             e.printStackTrace()
-            Results.Error(e)
+            Results.Success(
+                data = arrayListOf(localTrip),
+                code = Results.Success.CODE.WRITE_SUCCESS
+            )
         }
     }
 
-    suspend fun updateTripDetails(passCode: String,trip: Trip): Results{
-        //todo if entry not exist at backed, insert it
+    suspend fun updateTripDetails(passCode: String, localTrip: LocalTrip): Results {
 
         return try {
-            //1. first write to room database
-            tripDao.updateTrip(trip = trip)
-
-            //2. then to repository
-            val requestBody = FormBody.Builder()
-                .add("passcode", passCode)
-                .add("trip", trip.toJson())
-                .build()
-
-            val request = Request.Builder()
-                .url("$baseUrl/trip_update")
-                .post(requestBody)
-                .build()
-
             withContext(Dispatchers.IO) {
+                //1. first write to the repository
+                val requestBody = FormBody.Builder()
+                    .add("passcode", passCode)
+                    .add("trip", localTrip.trip.toJson())
+                    .build()
+
+                val request = Request.Builder()
+                    .url("$baseUrl/trip_update")
+                    .post(requestBody)
+                    .build()
+
+
                 val results =
                     client.newCall(request).execute()//wait for the results from the SERVER
                 val data = results.body?.string()
                 val jsonTree = JsonParser.parseString(data).asJsonObject
-                val writeResp = jsonTree.get("data").toString().replace("\"", "")
+                val writeResp = jsonTree.get("Status")?.toString()?.replace("\"", "")
 
-                if (writeResp == "Success")
-                    Results.Success(data = arrayListOf(), code = Results.Success.CODE.UPDATE_SUCCESS)
-                else Results.Error(AbstractModel.ServerException())
+                if (writeResp == "Success") {
+                    val jsonData = jsonTree.get("data").toString()
+                    val trip = jsonData.convert<Trip>()
+                    localTrip.trip = trip
+                    localTrip.awaitingNetwork = false
+                    tripDao.updateTrip(localTrip = localTrip)
+
+                    Results.Success(
+                        data = arrayListOf(localTrip),
+                        code = Results.Success.CODE.UPDATE_SUCCESS
+                    )
+                } else Results.Error(AbstractModel.ServerException())
             }
         } catch (e: Exception) {
+
+            try {
+                localTrip.awaitingNetwork = true
+                tripDao.updateTrip(localTrip)
+
+            } catch (e: Exception) {
+                //should not come here
+                e.printStackTrace()
+                Results.Error(e)
+            }
             e.printStackTrace()
-            Results.Error(e)
+            Results.Success<LocalTrip>(code = Results.Success.CODE.UPDATE_SUCCESS)
         }
     }
 
-    suspend fun loadTripInfo(): Results {
+    suspend fun loadTripInfo(passCode: String): Results {
         return try {
             withContext(Dispatchers.IO) {
                 val deferredRecords = listOf(
-                     //TODO should be loaded from the backend unless if there is no network
-                    // TODO then saved to local repo
 
                     async { tripDao.loadCurrentTrip() },
                     async { tripDao.loadCurrentTruck() }
                 )
                 val data = deferredRecords.awaitAll().filterNotNull() as ArrayList<AbstractModel>
-                Results.Success(code = Results.Success.CODE.LOAD_SUCCESS,data = data)
+                var responseArray: ArrayList<AbstractModel> = data
+
+                val localTrip = data.filterIsInstance<LocalTrip>().firstOrNull()
+                val truck = data.filterIsInstance<Truck>().firstOrNull()
+
+                localTrip?.let {
+                    if (it.id == null && it.awaitingNetwork) {
+                        //trip create at backend - never written to db
+                        val results = createNewTrip(passCode, localTrip)
+                        responseArray = if (results is Results.Success<*>)
+                            arrayListOf(
+                                results.data!!.first(),
+                                truck
+                            ).filterNotNull() as ArrayList<AbstractModel>
+                        else { //should normally not come here
+                            arrayListOf(truck).filterNotNull() as ArrayList<AbstractModel>
+                        }
+
+                    } else if (it.awaitingNetwork && it.id != null) {
+                        //trip update at backend
+                        val results = updateTripDetails(passCode, localTrip)
+                        responseArray = if (results is Results.Success<*>)
+                            arrayListOf(results.data!!.first(), truck) as ArrayList<AbstractModel>
+                        else { //should normally not come here
+                            arrayListOf(truck) as ArrayList<AbstractModel>
+                        }
+                    }
+                }
+                //todo if localTrip is null fetch latest incomplete trip from database
+
+                Results.Success(data = responseArray, code = Results.Success.CODE.LOAD_SUCCESS)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -150,7 +206,11 @@ class TripRepo(val app: Application) {
 }
 
 // Annotates class to be a Room Database with a table (entity) of the Word class
-@Database(entities = [Truck::class, Trip::class, Driver::class], version = 1, exportSchema = false)
+@Database(
+    entities = [Truck::class, LocalTrip::class, Driver::class],
+    version = 1,
+    exportSchema = false
+)
 abstract class TripDatabase : RoomDatabase() {
 
     abstract fun tripDao(): CurrentTripDao
@@ -195,16 +255,16 @@ interface CurrentTripDao {
     // trip room table ops
 
     @Insert
-    suspend fun insertTrip(trip: Trip)
+    suspend fun insertTrip(localTrip: LocalTrip)
 
     @Update
-    suspend fun updateTrip(trip: Trip)
+    suspend fun updateTrip(localTrip: LocalTrip)
 
-    @Query("delete from Trip")
+    @Query("delete from LocalTrip")
     suspend fun clearTripTable()
 
-    @Query("select * from Trip limit 1")
-    suspend fun loadCurrentTrip(): Trip?
+    @Query("select * from LocalTrip limit 1")
+    suspend fun loadCurrentTrip(): LocalTrip?
 
     // driver room table ops
     @Insert

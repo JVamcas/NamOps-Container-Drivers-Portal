@@ -10,6 +10,7 @@ import com.pet001kambala.namopscontainers.utils.DateUtil
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.copyOf
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import java.util.*
 
 class WeighEmptyTruckFragment : AbstractTripDetailsFragment() {
 
@@ -28,18 +29,21 @@ class WeighEmptyTruckFragment : AbstractTripDetailsFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.trip = trip
+        binding.trip = localTrip.trip
 
         binding.register.setOnClickListener {
-            trip.dateWeightBridgeEmpty = DateUtil.localDateToday()
-            val tripCopy = trip.copyOf()!!
-            tripCopy.tripStatus = TripStatus.PICK_UP
-            tripModel.updateTripDetails(driver, tripCopy).observe(viewLifecycleOwner) { results ->
+
+            localTrip.trip!!.dateWeightBridgeEmpty = DateUtil.localDateToday()
+            val localTripCopy = localTrip.copyOf()!!
+            localTripCopy.trip!!.tripStatus = TripStatus.PICK_UP
+
+            tripModel.updateTripDetails(driver, localTripCopy).observe(viewLifecycleOwner) { results ->
                 when (results) {
                     is Results.Loading -> showProgressBar("Saving empty-truck weight...")
                     is Results.Success<*> -> {
                         endProgressBar()
                         showToast("Saved.")
+                        navController.popBackStack()
                     }
                     else -> {
                         endProgressBar()
