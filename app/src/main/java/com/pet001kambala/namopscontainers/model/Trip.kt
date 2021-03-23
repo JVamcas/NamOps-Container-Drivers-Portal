@@ -1,11 +1,7 @@
 package com.pet001kambala.namopscontainers.model
 
 import androidx.databinding.Bindable
-import androidx.room.*
 import com.pet001kambala.namopscontainers.BR
-import com.pet001kambala.namopscontainers.utils.DriverConverter
-import com.pet001kambala.namopscontainers.utils.LocalDateConverter
-import com.pet001kambala.namopscontainers.utils.TripStatusConverter
 import java.time.LocalDateTime
 
 data class Trip(

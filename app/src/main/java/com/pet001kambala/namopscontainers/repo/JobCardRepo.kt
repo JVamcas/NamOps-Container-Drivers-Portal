@@ -23,13 +23,12 @@ class JobCardRepo {
 
             val jobCardList = if (filteredJobCardItems.isNullOrEmpty()) {
                 filteredJobCardItems.groupBy { it.jobCardNo }
-                    .map {
+                    .map { item ->
                         JobCard(
-                            jobCardNo = it.key,
-                            totalContainers = it.value.size,
-                            pickUpLocationName = it.value[0].pickUpLocationName ?: "Unknown",
-                            jobCardItemList = it.value,
-                            pendingContainers = it.value.count { !it.wasPickedUp })
+                            jobCardNo = item.key,
+                            totalContainers = item.value.size,
+                            pickUpLocationName = item.value[0].pickUpLocationName ?: "Unknown",
+                            pendingContainers = item.value.count { !it.wasPickedUp }).also{it.jobCardItemList = item.value}
                     }
             } else arrayListOf()
 
@@ -44,13 +43,13 @@ class JobCardRepo {
             val jobCardItems = results.data as ArrayList<JobCardItem>
             val filteredJobCardItems = jobCardItems.filter { it.driver?.id ?: -1 == 0 }
             val jobCardList = filteredJobCardItems.groupBy { it.jobCardNo }
-            val other = jobCardList.map {
+            val other = jobCardList.map {entry->
                 JobCard(
-                    jobCardNo = it.key,
-                    totalContainers = it.value.size,
-                    pickUpLocationName = it.value[0].pickUpLocationName ?: "Unknown",
-                    jobCardItemList = it.value,
-                    pendingContainers = it.value.count { !it.wasPickedUp })
+                    jobCardNo = entry.key,
+                    totalContainers = entry.value.size,
+                    pickUpLocationName = entry.value[0].pickUpLocationName ?: "Unknown",
+                    pendingContainers = entry.value.count { !it.wasPickedUp })
+                    .also { it.jobCardItemList = entry.value }
             }
 //            print(other.toJson())
 //            val jobCardList = if (filteredJobCardItems.isNullOrEmpty()) {

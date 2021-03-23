@@ -13,6 +13,7 @@ import com.pet001kambala.namopscontainers.model.Driver
 import com.pet001kambala.namopscontainers.model.JobCard
 import com.pet001kambala.namopscontainers.repo.JobCardRepo
 import com.pet001kambala.namopscontainers.ui.AbstractListFragment
+import com.pet001kambala.namopscontainers.ui.trip.TripViewModel
 import com.pet001kambala.namopscontainers.utils.Const
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.toJson
 import com.pet001kambala.namopscontainers.utils.Results
@@ -103,9 +104,26 @@ class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHol
     }
 
     override fun onModelClick(model: JobCard) {
+        showWarningDialog(
+            warningTxt = "Are you sure to take this JobCard?",
+            object : WarningDialogListener {
+                override fun onOkWarning() {
+                    tripModel.viewModelScope.launch {
+                        //todo will cause many jobcards to be there, ensure to clear the rest
+                        tripModel.tripDao.insertJobCard(model)
 
-        val bundle = Bundle().also { it.putString(Const.JOB_CARD, model.toJson()) }
-        navController.navigate(R.id.action_taskListFragment_to_newTripFragment, bundle)
+                        val bundle = Bundle().also { it.putString(Const.JOB_CARD, model.toJson()) }
+                        navController.navigate(
+                            R.id.action_taskListFragment_to_newTripFragment,
+                            bundle
+                        )
+                    }
+                }
+                override fun onCancelWarning() {
+
+                }
+            })
+
     }
 
     override fun onModelIconClick(model: JobCard) {

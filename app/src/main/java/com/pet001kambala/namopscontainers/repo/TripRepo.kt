@@ -207,7 +207,7 @@ class TripRepo(val app: Application) {
 
 // Annotates class to be a Room Database with a table (entity) of the Word class
 @Database(
-    entities = [Truck::class, LocalTrip::class, Driver::class],
+    entities = [Truck::class, LocalTrip::class, JobCard::class, Driver::class],
     version = 1,
     exportSchema = false
 )
@@ -278,4 +278,17 @@ interface CurrentTripDao {
 
     @Query("select * from Driver limit 1")
     suspend fun loadCurrentDriver(): Driver?
+
+    // JobCard room table ops
+    @Insert
+    suspend fun insertJobCard(jobCard: JobCard)
+
+    @Update
+    suspend fun updateJobCard(jobCard: JobCard)
+
+    @Query("delete from JobCard")
+    suspend fun clearJobCardTable()
+
+    @Query("select * from JobCard limit 1")
+    suspend fun loadCurrentJobCard(): JobCard?
 }

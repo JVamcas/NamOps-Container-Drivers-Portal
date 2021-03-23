@@ -5,25 +5,30 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AutoCompleteTextView
+import androidx.lifecycle.viewModelScope
+import com.otaliastudios.autocomplete.Autocomplete
 import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.FragmentNewTripBinding
+import com.pet001kambala.namopscontainers.databinding.FragmentPickUpContainerBinding
+import com.pet001kambala.namopscontainers.model.JobCardItem
 import com.pet001kambala.namopscontainers.model.TripStatus
-import com.pet001kambala.namopscontainers.utils.DateUtil
+import com.pet001kambala.namopscontainers.utils.*
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.copyOf
-import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 
 class PickUpContainerFragment : AbstractTripDetailsFragment() {
 
 
-    lateinit var binding: FragmentNewTripBinding
+    lateinit var binding: FragmentPickUpContainerBinding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        binding = FragmentNewTripBinding.inflate(inflater, container, false)
+        binding = FragmentPickUpContainerBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -32,26 +37,37 @@ class PickUpContainerFragment : AbstractTripDetailsFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.trip = localTrip.trip
+        tripModel.viewModelScope.launch {
+            val jobcard = tripModel.tripDao.loadCurrentJobCard()
 
-        binding.register.setOnClickListener {
+            Autocomplete.on<JobCardItem>(binding.container1)
+                .with(SimpleAutoCompletePolicy())
+//            .with(autocompleteCallback)
+                .with(RecyclerPresenter(context = requireContext(), jobCard = jobcard!!))
+                .build();
 
-            localTrip.trip!!.actualPickUpDate = DateUtil.localDateToday()
-            val localTripCopy = localTrip.copyOf()!!
-            localTripCopy.trip!!.tripStatus = if(localTrip.trip?.useBison == true) TripStatus.BISON else TripStatus.WEIGH_FULL
+            binding.register.setOnClickListener {
 
-            tripModel.updateTripDetails(driver, localTripCopy).observe(viewLifecycleOwner) { results ->
-                when (results) {
-                    is Results.Loading -> showProgressBar("Saving...")
-                    is Results.Success<*> -> {
-                        endProgressBar()
-                        showToast("Saved.")
-                        navController.popBackStack()
+                localTrip.trip!!.actualPickUpDate = DateUtil.localDateToday()
+                val localTripCopy = localTrip.copyOf()!!
+                localTripCopy.trip!!.tripStatus =
+                    if (localTrip.trip?.useBison == true) TripStatus.BISON else TripStatus.WEIGH_FULL
+
+                tripModel.updateTripDetails(driver, localTripCopy)
+                    .observe(viewLifecycleOwner) { results ->
+                        when (results) {
+                            is Results.Loading -> showProgressBar("Saving...")
+                            is Results.Success<*> -> {
+                                endProgressBar()
+                                showToast("Saved.")
+                                navController.popBackStack()
+                            }
+                            else -> {
+                                endProgressBar()
+                                parseRepoResults(results)
+                            }
+                        }
                     }
-                    else -> {
-                        endProgressBar()
-                        parseRepoResults(results)
-                    }
-                }
             }
         }
     }

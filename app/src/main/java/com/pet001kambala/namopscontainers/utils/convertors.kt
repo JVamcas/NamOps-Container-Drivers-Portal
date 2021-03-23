@@ -1,10 +1,7 @@
 package com.pet001kambala.namopscontainers.utils
 
 import androidx.room.TypeConverter
-import com.pet001kambala.namopscontainers.model.Driver
-import com.pet001kambala.namopscontainers.model.LocalTrip
-import com.pet001kambala.namopscontainers.model.Trip
-import com.pet001kambala.namopscontainers.model.TripStatus
+import com.pet001kambala.namopscontainers.model.*
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.convert
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.toJson
 import java.time.Instant
@@ -25,27 +22,16 @@ class TripStatusConverter {
     }
 }
 
-class LocalDateConverter {
+class JobCardItemConverter {
 
     @TypeConverter
-    fun toDate(timestamp: Long? = null): LocalDateTime? {
-
-        return if (timestamp != null)
-            LocalDateTime.ofInstant(
-                Instant.ofEpochMilli(timestamp),
-                ZoneId.systemDefault()
-            )
-        else null
+    fun toJobCardItemList(json: String?): List<JobCardItem>? {
+        return json?.convert()
     }
 
     @TypeConverter
-    fun toLong(date: LocalDateTime?): Long? {
-
-        return if (date != null)  {
-            val t = ""
-            print("date here is $date")
-            ZonedDateTime.of(date, ZoneId.systemDefault()).toInstant().toEpochMilli()
-        } else null
+    fun fromJobCardItemList(list: List<JobCardItem>?): String? {
+        return list?.toJson()
     }
 }
 

@@ -1,14 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".PickUpContainerFragment">
-
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="match_parent">
 
-</FrameLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="20dp"
+            android:paddingRight="20dp"
+            >
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/container1_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                >
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/container1"
+                    editContent="@{trip.container1}"
+                    errorMsg="@{`Please input the truck Odometer.`}"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/first_container_number"
+                    android:inputType="text"
+                    android:paddingBottom="9dp"
+                    android:singleLine="true"
+                    android:text="@={trip.container1}" />
+            </com.google.android.material.textfield.TextInputLayout>
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/startODM_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/container1_layout"
+                >
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/startODM"
+                    editContent="@{trip.pickUpODM}"
+                    errorMsg="@{`Please input the truck Odometer.`}"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/truck_odo"
+                    android:inputType="number"
+                    android:paddingBottom="9dp"
+                    android:singleLine="true"
+                    android:text="@={trip.pickUpODM}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/startLocationName_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/startODM_layout">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/startLocationName"
+                    editContent="@{trip.pickUpLocationName}"
+                    errorMsg="@{`Please input the current location name.`}"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/current_location_name"
+                    android:inputType="text"
+                    android:paddingBottom="9dp"
+                    android:singleLine="true"
+                    android:text="@={trip.pickUpLocationName}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/register"
+                style="@style/save_btn_outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:textAllCaps="false"
+                android:text="@string/register"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/startLocationName_layout" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </FrameLayout>
+
+    <data>
+        <variable
+            name="trip"
+            type="com.pet001kambala.namopscontainers.model.Trip" />
+    </data>
+</layout>
