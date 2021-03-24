@@ -78,7 +78,7 @@ class TripRepo(val app: Application) {
         }
     }
 
-    suspend fun updateTripDetails(passCode: String, localTrip: LocalTrip): Results {
+    suspend fun updateTripDetails(passCode: String, localTrip: LocalTrip,jobCard: JobCard? = null): Results {
 
         return try {
             withContext(Dispatchers.IO) {

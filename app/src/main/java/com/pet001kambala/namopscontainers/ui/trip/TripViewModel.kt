@@ -7,6 +7,7 @@ import com.pet001kambala.namopscontainers.repo.TripDatabase
 import com.pet001kambala.namopscontainers.repo.TripRepo
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.*
 
 class TripViewModel(app: Application) : AndroidViewModel(app) {
 
@@ -124,17 +125,52 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     /**
-     * 1. set trip to null,
-     * 2. remove [LocalTrip] from room
-     * 3. set JobCardItem completed in backend
+     * 1. set JobCardItem completed in backend
+     * 2. remove [LocalTrip] and [] from room
+     * 3. set [LocalTrip] to null,
      */
-    fun completeTrip(driver: Driver,jobCard: JobCard): LiveData<Results>{
+    fun completeTrip(driver: Driver, jobCard: JobCard, localTrip: LocalTrip): LiveData<Results> {
         oPLiveData = liveData {
             emit(Results.Loading)
             try {
 
-                val jobCardItemList = jobCard.jobCardItemList
+                jobCard.jobCardItemList?.forEach { it.jobCardCompleted = true }
+                val results = tripRepo.updateTripDetails(
+                    passCode = driver.passCode,
+                    localTrip = localTrip,
+                    jobCard = jobCard
+                )
 
+                emit(
+                    if (results is Results.Success<*>) {
+                        withContext(Dispatchers.Default) {
+                            val deferredRecords = listOf(
+                                async { tripDao.clearJobCardTable() },
+                                async { tripDao.clearTripTable() }
+                            )
+                            deferredRecords.awaitAll()
+
+                            _currentTrip = MutableLiveData<LocalTrip>()
+
+                            Results.Success<Trip>(code = Results.Success.CODE.UPDATE_SUCCESS)
+                        }
+                    } else results
+                )
+
+
+            } catch (e: Exception) {
+                Results.Error(e)
+            }
+        }
+        return oPLiveData
+    }
+
+    fun setContainerPickedUp(driver: Driver, jobCard: JobCard): LiveData<Results> {
+        oPLiveData = liveData {
+            emit(Results.Loading)
+            try {
+
+                val jobCardItemList = jobCard.jobCardItemList?.forEach { it.wasPickedUp = true }
 
 
             } catch (e: Exception) {

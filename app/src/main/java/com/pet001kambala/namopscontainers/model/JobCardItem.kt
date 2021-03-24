@@ -17,8 +17,8 @@ data class JobCardItem(
     val isFull: Boolean = false,
     val customerRef: String? = null,
     val driver: Driver? = null, //assigned if container is full
-    val jobCardCompleted: Boolean = false, // whether or not the job card item is completed so as not to include it again.
-    val wasPickedUp: Boolean = false,
+    var jobCardCompleted: Boolean = false, // whether or not the job card item is completed so as not to include it again.
+    var wasPickedUp: Boolean = false,
     val scanContainer: Boolean = false,
     val useBison: Boolean  = false,
     val useWeighBridge: Boolean = false,
