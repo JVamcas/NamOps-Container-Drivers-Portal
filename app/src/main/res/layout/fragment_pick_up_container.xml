@@ -19,11 +19,14 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 >
-
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/container1"
                     editContent="@{trip.container1}"
-                    errorMsg="@{`Please input the truck Odometer.`}"
+                    errorMsg="@{`Please input the container number.`}"
+                    jobCard="@{jobcard}"
+                    trip="@{trip}"
+                    containerIndex="@{1}"
+                    containerNo="@{trip.container1}"
                     android:layout_width="fill_parent"
                     android:layout_height="match_parent"
                     android:hint="@string/first_container_number"
@@ -32,12 +35,62 @@
                     android:singleLine="true"
                     android:text="@={trip.container1}" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/container2_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/container1_layout"
+                >
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/container2"
+                    editContent="@{trip.container2}"
+                    errorMsg="@{`Please input the container number.`}"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/_2nd_container_number"
+                    android:inputType="text"
+                    containerIndex="@{2}"
+                    jobCard="@{jobcard}"
+                    trip="@{trip}"
+                    containerNo="@{trip.container2}"
+                    android:paddingBottom="9dp"
+                    android:singleLine="true"
+                    android:text="@={trip.container2}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/container3_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/container2_layout"
+                >
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/container3"
+                    editContent="@{trip.container3}"
+                    errorMsg="@{`Please input the container number.`}"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:hint="@string/_3rd_container_number"
+                    android:inputType="text"
+                    containerIndex="@{3}"
+                    jobCard="@{jobcard}"
+                    containerNo="@{trip.container3}"
+                    trip="@{trip}"
+                    android:paddingBottom="9dp"
+                    android:singleLine="true"
+                    android:text="@={trip.container3}" />
+            </com.google.android.material.textfield.TextInputLayout>
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/startODM_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/container1_layout"
+                app:layout_constraintTop_toBottomOf="@id/container3_layout"
                 >
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -90,5 +143,8 @@
         <variable
             name="trip"
             type="com.pet001kambala.namopscontainers.model.Trip" />
+        <variable
+            name="jobcard"
+            type="com.pet001kambala.namopscontainers.model.JobCard" />
     </data>
 </layout>

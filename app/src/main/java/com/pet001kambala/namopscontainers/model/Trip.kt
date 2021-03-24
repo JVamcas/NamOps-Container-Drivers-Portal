@@ -212,6 +212,7 @@ data class Trip(
                 notifyPropertyChanged(BR.dropOffLocationName)
             }
         }
+    var dropOffDate: LocalDateTime? = null
 
     @Bindable
     var memNotes: String? = null
@@ -229,5 +230,5 @@ data class Trip(
 }
 
 enum class TripStatus {
-    START, WEIGH_EMPTY, PICK_UP, WEIGH_FULL, BISON, DROP_OFF
+    START, WEIGH_EMPTY, PICK_UP, WEIGH_FULL, BISON, DROP_OFF,COMPLETED
 }

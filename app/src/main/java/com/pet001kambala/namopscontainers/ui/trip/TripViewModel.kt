@@ -2,10 +2,7 @@ package com.pet001kambala.namopscontainers.ui.trip
 
 import android.app.Application
 import androidx.lifecycle.*
-import com.pet001kambala.namopscontainers.model.Driver
-import com.pet001kambala.namopscontainers.model.Trip
-import com.pet001kambala.namopscontainers.model.LocalTrip
-import com.pet001kambala.namopscontainers.model.Truck
+import com.pet001kambala.namopscontainers.model.*
 import com.pet001kambala.namopscontainers.repo.TripDatabase
 import com.pet001kambala.namopscontainers.repo.TripRepo
 import com.pet001kambala.namopscontainers.utils.Results
@@ -118,6 +115,27 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
                     }
                 }
                 emit(results)
+
+            } catch (e: Exception) {
+                Results.Error(e)
+            }
+        }
+        return oPLiveData
+    }
+
+    /**
+     * 1. set trip to null,
+     * 2. remove [LocalTrip] from room
+     * 3. set JobCardItem completed in backend
+     */
+    fun completeTrip(driver: Driver,jobCard: JobCard): LiveData<Results>{
+        oPLiveData = liveData {
+            emit(Results.Loading)
+            try {
+
+                val jobCardItemList = jobCard.jobCardItemList
+
+
 
             } catch (e: Exception) {
                 Results.Error(e)

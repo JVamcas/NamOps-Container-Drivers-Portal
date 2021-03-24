@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.FragmentHomeBinding
+import com.pet001kambala.namopscontainers.model.TripStatus
 import com.pet001kambala.namopscontainers.ui.AbstractFragment
 import com.pet001kambala.namopscontainers.utils.Const
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,9 +45,7 @@ class HomeFragment : AbstractFragment() {
         }
 
         tripModel.currentLocalTrip.observe(viewLifecycleOwner) {
-            it?.let {
-                binding.trip = it.trip
-            }
+            binding.trip = it?.trip
         }
         with(binding.tripLayout) {
             weighEmptyBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_weighEmptyTruckFragment) }

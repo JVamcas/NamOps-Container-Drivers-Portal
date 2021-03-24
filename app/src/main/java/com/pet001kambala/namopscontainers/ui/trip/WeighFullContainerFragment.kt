@@ -7,6 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.FragmentWeighFullContainerBinding
+import com.pet001kambala.namopscontainers.model.TripStatus
+import com.pet001kambala.namopscontainers.utils.DateUtil
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.copyOf
+import com.pet001kambala.namopscontainers.utils.Results
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 
 class WeighFullContainerFragment : AbstractTripDetailsFragment() {
@@ -24,11 +29,33 @@ class WeighFullContainerFragment : AbstractTripDetailsFragment() {
         return binding.root
     }
 
+    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.trip = localTrip.trip
 
 
+        binding.register.setOnClickListener {
+
+            localTrip.trip!!.dateWeightBridgeFull = DateUtil.localDateToday()
+            val localTripCopy = localTrip.copyOf()!!
+            localTripCopy.trip!!.tripStatus = TripStatus.DROP_OFF
+
+            tripModel.updateTripDetails(driver, localTripCopy).observe(viewLifecycleOwner) { results ->
+                when (results) {
+                    is Results.Loading -> showProgressBar("Saving truck weight...")
+                    is Results.Success<*> -> {
+                        endProgressBar()
+                        showToast("Saved.")
+                        navController.popBackStack()
+                    }
+                    else -> {
+                        endProgressBar()
+                        parseRepoResults(results)
+                    }
+                }
+            }
+        }
     }
 }

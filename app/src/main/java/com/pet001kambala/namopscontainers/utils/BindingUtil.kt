@@ -8,6 +8,8 @@ import androidx.annotation.IdRes
 import androidx.databinding.BindingAdapter
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import com.pet001kambala.namopscontainers.model.JobCard
+import com.pet001kambala.namopscontainers.model.Trip
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isValidEmail
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isValidMobile
 
@@ -31,9 +33,45 @@ class BindingUtil {
         }
 
         @JvmStatic
-        @BindingAdapter(value = ["errorMsg", "plateNumber","isSecondTrailer"])
-        fun validateTrailerPlateNumber(mEditText: EditText, errorMsg: String?, plateNumber: String?,isSecondTrailer: Boolean = false) {
+        @BindingAdapter(value = ["errorMsg", "plateNumber", "isSecondTrailer"])
+        fun validateTrailerPlateNumber(
+            mEditText: EditText,
+            errorMsg: String?,
+            plateNumber: String?,
+            isSecondTrailer: Boolean = false
+        ) {
 
+        }
+
+        @JvmStatic
+        @BindingAdapter(value = ["containerNo", "jobCard", "containerIndex", "trip"])
+        fun validateSetJobCardNo(
+            mEditText: EditText,
+            containerNo: String?,
+            jobCard: JobCard?,
+            containerIndex: Int?,
+            trip: Trip
+        ) {
+            val isValidContainer =
+                jobCard?.jobCardItemList?.any { it.containerNo == containerNo }
+
+            if (containerNo?.length == 7) {
+                if (isValidContainer == true) {
+                    when (containerIndex) {
+                        1 -> {
+                            trip.container1JobCardId = jobCard.jobCardNo
+                        }
+                        2 -> {
+                            trip.container2JobCardId = jobCard.jobCardNo
+                        }
+                        3 -> {
+                            trip.container3JobCardId = jobCard.jobCardNo
+                        }
+                    }
+                }
+            }
+            mEditText.error =
+                if(isValidContainer == true) null else if (containerNo?.length != 7) "Invalid container number." else "Container is not on this JobCard."
         }
 
 
