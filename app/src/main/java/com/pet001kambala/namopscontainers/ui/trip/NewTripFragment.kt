@@ -9,6 +9,7 @@ import com.pet001kambala.namopscontainers.databinding.FragmentNewTripBinding
 import com.pet001kambala.namopscontainers.model.LocalTrip
 import com.pet001kambala.namopscontainers.model.Trip
 import com.pet001kambala.namopscontainers.model.TripStatus
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.copyOf
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -34,6 +35,8 @@ class NewTripFragment : AbstractTripDetailsFragment() {
             //load truck odometer
         }
 
+        binding.trip = localTrip.trip
+
         binding.register.setOnClickListener {
 
             localTrip.trip?.apply {
@@ -44,7 +47,11 @@ class NewTripFragment : AbstractTripDetailsFragment() {
 
             localTrip.trip?.tripStatus = TripStatus.WEIGH_EMPTY
 
-            tripModel.createNewTrip(driver, localTrip).observe(viewLifecycleOwner) { result ->
+            val localTripCopy = localTrip.copyOf().also {
+                it?.trip?.tripStatus = if (it?.trip?.useBison != true) TripStatus.WEIGH_EMPTY else TripStatus.PICK_UP
+            }
+
+            tripModel.createNewTrip(driver, localTripCopy!!).observe(viewLifecycleOwner) { result ->
                 when (result) {
                     is Results.Loading -> showProgressBar("Creating new trip")
                     is Results.Success<*> -> {

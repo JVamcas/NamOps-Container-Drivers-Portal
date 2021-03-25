@@ -52,14 +52,10 @@ class DropOffContainerFragment : AbstractTripDetailsFragment() {
                         val localTripCopy = localTrip.copyOf()!!
                         localTripCopy.trip!!.tripStatus = TripStatus.COMPLETED
 
-                        val jobCardCopy =
-                            jobCard.copyOf().also {//filter out jobcarditem of interest
-                                it?.jobCardItemList =
-                                    it?.jobCardItemList?.filterNot { it.containerNo == null }
-                            }
-                        jobCardCopy?.jobCardItemList?.forEach { //set those to completed
-                            it.jobCardCompleted = it.containerNo != null
-                        }
+
+                        val jobCardCopy = jobCard.copyOf()
+
+                        jobCardCopy?.filterPickedUpContainers(localTrip.trip!!)?.forEach { it.jobCardCompleted = true }
 
                         tripModel.completeTrip(
                             driver = driver,

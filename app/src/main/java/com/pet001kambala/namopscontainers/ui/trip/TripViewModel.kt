@@ -134,7 +134,6 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
             emit(Results.Loading)
             try {
 
-                jobCard.jobCardItemList?.forEach { it.jobCardCompleted = true }
                 val results = tripRepo.updateTripDetails(
                     passCode = driver.passCode,
                     localTrip = localTrip,

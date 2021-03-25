@@ -16,7 +16,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 class WeighFullContainerFragment : AbstractTripDetailsFragment() {
 
-
     private lateinit var binding: FragmentWeighFullContainerBinding
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

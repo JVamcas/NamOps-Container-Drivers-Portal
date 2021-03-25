@@ -13,7 +13,6 @@ import com.pet001kambala.namopscontainers.model.JobCard
 import com.pet001kambala.namopscontainers.model.Trip
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isValidEmail
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isValidMobile
-import com.skydoves.powerspinner.PowerSpinnerView
 
 import com.squareup.picasso.Picasso
 

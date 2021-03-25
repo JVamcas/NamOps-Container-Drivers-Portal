@@ -22,4 +22,10 @@ data class JobCard(
     override fun toString(): String {
         return "Pick up $pendingContainers containers from $pickUpLocationName"
     }
+
+    fun filterPickedUpContainers(trip: Trip): List<JobCardItem>{
+        val containers = arrayListOf(trip.container1,trip.container2,trip.container3)
+
+        return jobCardItemList?.filter { it.containerNo in containers }!!
+    }
 }

@@ -19,6 +19,7 @@ import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.toJson
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
+import java.lang.Exception
 
 
 class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHolder>() {
@@ -109,8 +110,12 @@ class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHol
             object : WarningDialogListener {
                 override fun onOkWarning() {
                     tripModel.viewModelScope.launch {
-                        //todo will cause many jobcards to be there, ensure to clear the rest
-                        tripModel.tripDao.insertJobCard(model)
+                        try{
+                            tripModel.tripDao.clearJobCardTable()
+                            tripModel.tripDao.insertJobCard(model)
+                        }
+                        catch (e:Exception){}
+
 
                         val bundle = Bundle().also { it.putString(Const.JOB_CARD, model.toJson()) }
                         navController.navigate(

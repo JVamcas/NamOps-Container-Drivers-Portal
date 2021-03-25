@@ -53,167 +53,169 @@ class TripRepo(val app: Application) {
                     localTrip.trip = trip
                     localTrip.awaitingNetwork = false
 
-                    tripDao.insertTrip(localTrip = localTrip)
+                    tripDao.clearTripTable()
+                    tripDao.insertTrip(localTrip)
 
-                    Results.Success(
-                        data = arrayListOf(localTrip),
-                        code = Results.Success.CODE.WRITE_SUCCESS
-                    )
-                } else Results.Error(AbstractModel.ServerException())
-            }
-        } catch (e: Exception) {
-            try {
-                localTrip.awaitingNetwork = true
-                tripDao.insertTrip(localTrip)
-            } catch (e: Exception) {
-                //should not come here
-                e.printStackTrace()
-                Results.Error(e)
-            }
-            e.printStackTrace()
-            Results.Success(
-                data = arrayListOf(localTrip),
-                code = Results.Success.CODE.WRITE_SUCCESS
-            )
-        }
-    }
-
-    suspend fun updateTripDetails(
-        passCode: String,
-        localTrip: LocalTrip,
-        jobCard: JobCard? = null
-    ): Results {
-
-        return try {
-            withContext(Dispatchers.IO) {
-                //1. first write to the repository
-                val requestBody = FormBody.Builder()
-                    .add("passcode", passCode)
-                    .add("trip", localTrip.trip.toJson())
-
-                jobCard?.jobCardItemList?.let {
-                    requestBody.add(
-                        "job_card_items",
-                        jobCard.jobCardItemList.toJson()
-                    )
-                }
-                val req = requestBody.build()
-
-                val request = Request.Builder()
-                    .url("$baseUrl/trip_update")
-                    .post(req)
-                    .build()
-
-
-                val results =
-                    client.newCall(request).execute()//wait for the results from the SERVER
-                val data = results.body?.string()
-                val jsonTree = JsonParser.parseString(data).asJsonObject
-                val writeResp = jsonTree.get("Status")?.toString()?.replace("\"", "")
-
-                if (writeResp == "Success") {
-                    val jsonData = jsonTree.get("data").toString()
-                    val trip = jsonData.convert<Trip>()
-                    localTrip.trip = trip
-                    localTrip.awaitingNetwork = false
-                    tripDao.updateTrip(localTrip = localTrip)
-
-                    Results.Success(
-                        data = arrayListOf(localTrip),
-                        code = Results.Success.CODE.UPDATE_SUCCESS
-                    )
-                } else Results.Error(AbstractModel.ServerException())
-            }
-        } catch (e: Exception) {
-
-            try {
-                localTrip.awaitingNetwork = true
-                tripDao.updateTrip(localTrip)
-
-            } catch (e: Exception) {
-                //should not come here
-                e.printStackTrace()
-                Results.Error(e)
-            }
-            e.printStackTrace()
-            Results.Success<LocalTrip>(code = Results.Success.CODE.UPDATE_SUCCESS)
-        }
-    }
-
-    suspend fun loadTripInfo(passCode: String): Results {
-        return try {
-            withContext(Dispatchers.IO) {
-                val deferredRecords = listOf(
-
-                    async { tripDao.loadCurrentTrip() },
-                    async { tripDao.loadCurrentTruck() }
+                Results.Success(
+                    data = arrayListOf(localTrip),
+                    code = Results.Success.CODE.WRITE_SUCCESS
                 )
-                val data = deferredRecords.awaitAll().filterNotNull() as ArrayList<AbstractModel>
-                var responseArray: ArrayList<AbstractModel> = data
-
-                val localTrip = data.filterIsInstance<LocalTrip>().firstOrNull()
-                val truck = data.filterIsInstance<Truck>().firstOrNull()
-
-                localTrip?.let {
-                    if (it.id == null && it.awaitingNetwork) {
-                        //trip create at backend - never written to db
-                        val results = createNewTrip(passCode, localTrip)
-                        responseArray = if (results is Results.Success<*>)
-                            arrayListOf(
-                                results.data!!.first(),
-                                truck
-                            ).filterNotNull() as ArrayList<AbstractModel>
-                        else { //should normally not come here
-                            arrayListOf(truck).filterNotNull() as ArrayList<AbstractModel>
-                        }
-
-                    } else if (it.awaitingNetwork && it.id != null) {
-                        //trip update at backend
-                        val results = updateTripDetails(passCode, localTrip)
-                        responseArray = if (results is Results.Success<*>)
-                            arrayListOf(results.data!!.first(), truck) as ArrayList<AbstractModel>
-                        else { //should normally not come here
-                            arrayListOf(truck) as ArrayList<AbstractModel>
-                        }
-                    }
-                }
-                //todo if localTrip is null fetch latest incomplete trip from database
-
-                Results.Success(data = responseArray, code = Results.Success.CODE.LOAD_SUCCESS)
-            }
+            } else Results.Error(AbstractModel.ServerException())
+        }
+    } catch (e: Exception)
+    {
+        try {
+            localTrip.awaitingNetwork = true
+            tripDao.insertTrip(localTrip)
         } catch (e: Exception) {
+            //should not come here
             e.printStackTrace()
             Results.Error(e)
         }
+        e.printStackTrace()
+        Results.Success(
+            data = arrayListOf(localTrip),
+            code = Results.Success.CODE.WRITE_SUCCESS
+        )
     }
+}
 
+suspend fun updateTripDetails(
+    passCode: String,
+    localTrip: LocalTrip,
+    jobCard: JobCard? = null
+): Results {
 
-    /***
-     * Find the odometer reading for this vehicle from webfleet
-     * @param vehicleNo for the vehicle in question
-     * @return odometer reading else null
-     */
-    @InternalCoroutinesApi
-    suspend fun findVehicleOdometer(vehicleNo: String): String {
-        val url = "https://csv.telematics.tomtom.com/extern?" +
-                "account=namops&username=Rauna&password=3Mili2,87&" +
-                "apikey=0e7ddb3b-65b0-4991-82a9-1c5c6f312317&lang=en&action=showObjectReportExtern"
-        val request = Request.Builder()
-            .url(url)
-            .build()
+    return try {
+        withContext(Dispatchers.IO) {
+            //1. first write to the repository
+            val requestBody = FormBody.Builder()
+                .add("passcode", passCode)
+                .add("trip", localTrip.trip.toJson())
 
-        return try {
-            withContext(Dispatchers.IO) {
-                val results = client.newCall(request).execute()//wait for the results from webfleet
-                val data = results.body?.string()
-                val csvParser = CSVFormat.newFormat(';').withQuote('"').parse(StringReader(data))
-                val vehicleRecord = csvParser.records.filter { it[0] == vehicleNo }
-                (round(vehicleRecord.first()[30].toDouble() / 10.0)).toString()// vehicle odometer reading
+            jobCard?.jobCardItemList?.let {
+                requestBody.add(
+                    "job_card_items",
+                    jobCard.jobCardItemList.toJson()
+                )
             }
-        } catch (e: Exception) {
-            "0.0"
+            val req = requestBody.build()
+
+            val request = Request.Builder()
+                .url("$baseUrl/trip_update")
+                .post(req)
+                .build()
+
+
+            val results =
+                client.newCall(request).execute()//wait for the results from the SERVER
+            val data = results.body?.string()
+            val jsonTree = JsonParser.parseString(data).asJsonObject
+            val writeResp = jsonTree.get("Status")?.toString()?.replace("\"", "")
+
+            if (writeResp == "Success") {
+                val jsonData = jsonTree.get("data").toString()
+                val trip = jsonData.convert<Trip>()
+                localTrip.trip = trip
+                localTrip.awaitingNetwork = false
+                tripDao.updateTrip(localTrip = localTrip)
+
+                Results.Success(
+                    data = arrayListOf(localTrip),
+                    code = Results.Success.CODE.UPDATE_SUCCESS
+                )
+            } else Results.Error(AbstractModel.ServerException())
         }
+    } catch (e: Exception) {
+
+        try {
+            localTrip.awaitingNetwork = true
+            tripDao.updateTrip(localTrip)
+
+        } catch (e: Exception) {
+            //should not come here
+            e.printStackTrace()
+            Results.Error(e)
+        }
+        e.printStackTrace()
+        Results.Success<LocalTrip>(code = Results.Success.CODE.UPDATE_SUCCESS)
     }
+}
+
+suspend fun loadTripInfo(passCode: String): Results {
+    return try {
+        withContext(Dispatchers.IO) {
+            val deferredRecords = listOf(
+
+                async { tripDao.loadCurrentTrip() },
+                async { tripDao.loadCurrentTruck() }
+            )
+            val data = deferredRecords.awaitAll().filterNotNull() as ArrayList<AbstractModel>
+            var responseArray: ArrayList<AbstractModel> = data
+
+            val localTrip = data.filterIsInstance<LocalTrip>().firstOrNull()
+            val truck = data.filterIsInstance<Truck>().firstOrNull()
+
+            localTrip?.let {
+                if (it.id == null && it.awaitingNetwork) {
+                    //trip create at backend - never written to db
+                    val results = createNewTrip(passCode, localTrip)
+                    responseArray = if (results is Results.Success<*>)
+                        arrayListOf(
+                            results.data!!.first(),
+                            truck
+                        ).filterNotNull() as ArrayList<AbstractModel>
+                    else { //should normally not come here
+                        arrayListOf(truck).filterNotNull() as ArrayList<AbstractModel>
+                    }
+
+                } else if (it.awaitingNetwork && it.id != null) {
+                    //trip update at backend
+                    val results = updateTripDetails(passCode, localTrip)
+                    responseArray = if (results is Results.Success<*>)
+                        arrayListOf(results.data!!.first(), truck) as ArrayList<AbstractModel>
+                    else { //should normally not come here
+                        arrayListOf(truck) as ArrayList<AbstractModel>
+                    }
+                }
+            }
+            //todo if localTrip is null fetch latest incomplete trip from database
+
+            Results.Success(data = responseArray, code = Results.Success.CODE.LOAD_SUCCESS)
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        Results.Error(e)
+    }
+}
+
+
+/***
+ * Find the odometer reading for this vehicle from webfleet
+ * @param vehicleNo for the vehicle in question
+ * @return odometer reading else null
+ */
+@InternalCoroutinesApi
+suspend fun findVehicleOdometer(vehicleNo: String): String {
+    val url = "https://csv.telematics.tomtom.com/extern?" +
+            "account=namops&username=Rauna&password=3Mili2,87&" +
+            "apikey=0e7ddb3b-65b0-4991-82a9-1c5c6f312317&lang=en&action=showObjectReportExtern"
+    val request = Request.Builder()
+        .url(url)
+        .build()
+
+    return try {
+        withContext(Dispatchers.IO) {
+            val results = client.newCall(request).execute()//wait for the results from webfleet
+            val data = results.body?.string()
+            val csvParser = CSVFormat.newFormat(';').withQuote('"').parse(StringReader(data))
+            val vehicleRecord = csvParser.records.filter { it[0] == vehicleNo }
+            (round(vehicleRecord.first()[30].toDouble() / 10.0)).toString()// vehicle odometer reading
+        }
+    } catch (e: Exception) {
+        "0.0"
+    }
+}
 }
 
 // Annotates class to be a Room Database with a table (entity) of the Word class
