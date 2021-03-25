@@ -29,26 +29,31 @@ class WeighEmptyTruckFragment : AbstractTripDetailsFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.trip = localTrip.trip
+        tripModel.currentLocalTrip.observe(viewLifecycleOwner) {
+            it?.let { localTrip ->
+                binding.trip = localTrip.trip
 
-        binding.register.setOnClickListener {
+                binding.register.setOnClickListener {
 
-            localTrip.trip!!.dateWeightBridgeEmpty = DateUtil.localDateToday()
-            val localTripCopy = localTrip.copyOf()!!
-            localTripCopy.trip!!.tripStatus = TripStatus.PICK_UP
+                    localTrip.trip!!.dateWeightBridgeEmpty = DateUtil.localDateToday()
+                    val localTripCopy = localTrip.copyOf()!!
+                    localTripCopy.trip!!.tripStatus = TripStatus.PICK_UP
 
-            tripModel.updateTripDetails(driver, localTripCopy).observe(viewLifecycleOwner) { results ->
-                when (results) {
-                    is Results.Loading -> showProgressBar("Saving empty-truck weight...")
-                    is Results.Success<*> -> {
-                        endProgressBar()
-                        showToast("Saved.")
-                        navController.popBackStack()
-                    }
-                    else -> {
-                        endProgressBar()
-                        parseRepoResults(results)
-                    }
+                    tripModel.updateTripDetails(driver, localTripCopy)
+                        .observe(viewLifecycleOwner) { results ->
+                            when (results) {
+                                is Results.Loading -> showProgressBar("Saving empty-truck weight...")
+                                is Results.Success<*> -> {
+                                    endProgressBar()
+                                    showToast("Saved.")
+                                    navController.popBackStack()
+                                }
+                                else -> {
+                                    endProgressBar()
+                                    parseRepoResults(results)
+                                }
+                            }
+                        }
                 }
             }
         }

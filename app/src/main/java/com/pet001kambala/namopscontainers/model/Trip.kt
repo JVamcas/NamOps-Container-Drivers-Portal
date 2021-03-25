@@ -205,7 +205,7 @@ data class Trip(
         }
 
     @Bindable
-    var dropOffLocationName: String? = "Unkown"
+    var dropOffLocationName: String? = "Unknown"
         set(value) {
             if (field != value) {
                 field = value

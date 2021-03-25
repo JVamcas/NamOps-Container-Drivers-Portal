@@ -54,9 +54,9 @@ class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHol
 
         jobCardModel.viewModelScope.launch {
             binding.jobCardCount = 1
+            showProgressBar("Just a moment...")
 
             if (isPreAssignedJobs) {
-                showProgressBar("Just a moment...")
                 val results = JobCardRepo().loadPreAssignedJobCards(driver)
                 endProgressBar()
                 if (results is Results.Success<*>) {
@@ -73,7 +73,7 @@ class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHol
 
 
             } else {
-                showProgressBar("Just a moment...")
+
                 val results = JobCardRepo().loadUnAssignedJobCards(driver)
                 endProgressBar()
                 if (results is Results.Success<*>) {

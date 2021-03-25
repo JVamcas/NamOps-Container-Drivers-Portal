@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
 import androidx.lifecycle.viewModelScope
 import com.otaliastudios.autocomplete.Autocomplete
@@ -19,7 +20,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
 class PickUpContainerFragment : AbstractTripDetailsFragment() {
-
 
     lateinit var binding: FragmentPickUpContainerBinding
 
@@ -36,38 +36,67 @@ class PickUpContainerFragment : AbstractTripDetailsFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.trip = localTrip.trip
-        tripModel.viewModelScope.launch {
-            val jobcard = tripModel.tripDao.loadCurrentJobCard()
+        tripModel.currentLocalTrip.observe(viewLifecycleOwner) {
+            it?.let { localTrip ->
 
-            Autocomplete.on<JobCardItem>(binding.container1)
-                .with(SimpleAutoCompletePolicy())
-//            .with(autocompleteCallback)
-                .with(RecyclerPresenter(context = requireContext(), jobCard = jobcard!!))
-                .build();
+                binding.trip = localTrip.trip
+                tripModel.viewModelScope.launch {
+                    val jobcard = tripModel.tripDao.loadCurrentJobCard()
 
-            binding.register.setOnClickListener {
-
-                localTrip.trip!!.actualPickUpDate = DateUtil.localDateToday()
-                val localTripCopy = localTrip.copyOf()!!
-                localTripCopy.trip!!.tripStatus =
-                    if (localTrip.trip?.useBison == true) TripStatus.BISON else TripStatus.WEIGH_FULL
-
-                tripModel.updateTripDetails(driver, localTripCopy)
-                    .observe(viewLifecycleOwner) { results ->
-                        when (results) {
-                            is Results.Loading -> showProgressBar("Saving...")
-                            is Results.Success<*> -> {
-                                endProgressBar()
-                                showToast("Saved.")
-                                navController.popBackStack()
-                            }
-                            else -> {
-                                endProgressBar()
-                                parseRepoResults(results)
-                            }
-                        }
+                    arrayListOf(
+                        binding.container1,
+                        binding.container2,
+                        binding.container3
+                    ).forEach {
+                        it.setAdapter(
+                            ArrayAdapter(
+                                requireContext(),
+                                R.layout.auto_select_layout,
+                                jobcard?.jobCardItemList?.map { it.containerNo }?.toList()!!
+                            )
+                        )
+                        it.threshold = 1
                     }
+
+                    binding.register.setOnClickListener {
+
+                        localTrip.trip!!.actualPickUpDate = DateUtil.localDateToday()
+                        val localTripCopy = localTrip.copyOf()!!
+                        localTripCopy.trip!!.tripStatus =
+                            if (localTrip.trip?.useBison == true) TripStatus.BISON else TripStatus.WEIGH_FULL
+
+                        val jobCardCopy =
+                            jobcard.copyOf().also {//filter out jobcarditem of interest
+                                it?.jobCardItemList =
+                                    it?.jobCardItemList?.filterNot { it.containerNo == null }
+                            }
+
+                        jobCardCopy?.jobCardItemList?.forEach {
+                            it.wasPickedUp = it.containerNo != null
+                        }
+
+                        tripModel.updateTripDetails(
+                            driver = driver,
+                            localTrip = localTripCopy,
+                            jobCard = jobCardCopy
+                        )
+
+                            .observe(viewLifecycleOwner) { results ->
+                                when (results) {
+                                    is Results.Loading -> showProgressBar("Saving...")
+                                    is Results.Success<*> -> {
+                                        endProgressBar()
+                                        showToast("Saved.")
+                                        navController.popBackStack()
+                                    }
+                                    else -> {
+                                        endProgressBar()
+                                        parseRepoResults(results)
+                                    }
+                                }
+                            }
+                    }
+                }
             }
         }
     }

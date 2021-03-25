@@ -42,11 +42,11 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     @ExperimentalCoroutinesApi
-    fun updateTripDetails(driver: Driver, localTrip: LocalTrip): LiveData<Results> {
+    fun updateTripDetails(driver: Driver, localTrip: LocalTrip,jobCard: JobCard? = null): LiveData<Results> {
         oPLiveData = liveData {
             emit(Results.Loading)
             try {
-                val results = tripRepo.updateTripDetails(driver.passCode, localTrip)
+                val results = tripRepo.updateTripDetails(driver.passCode, localTrip,jobCard)
                 if (results is Results.Success<*>) {
                     val data = results.data?.firstOrNull()
                     _currentTrip.value = data as? LocalTrip
@@ -126,7 +126,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
 
     /**
      * 1. set JobCardItem completed in backend
-     * 2. remove [LocalTrip] and [] from room
+     * 2. remove [LocalTrip] and [JobCard] from room database
      * 3. set [LocalTrip] to null,
      */
     fun completeTrip(driver: Driver, jobCard: JobCard, localTrip: LocalTrip): LiveData<Results> {
@@ -156,7 +156,6 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
                         }
                     } else results
                 )
-
 
             } catch (e: Exception) {
                 Results.Error(e)

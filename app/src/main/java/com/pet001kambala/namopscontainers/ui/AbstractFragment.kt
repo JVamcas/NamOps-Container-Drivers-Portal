@@ -26,6 +26,7 @@ import com.pet001kambala.namopscontainers.model.Truck
 import com.pet001kambala.namopscontainers.ui.account.AccountViewModel
 import com.pet001kambala.namopscontainers.ui.home.HomeFragment
 import com.pet001kambala.namopscontainers.ui.trip.AbstractTripDetailsFragment
+import com.pet001kambala.namopscontainers.ui.trip.NewTripFragment
 import com.pet001kambala.namopscontainers.ui.trip.TripViewModel
 import com.pet001kambala.namopscontainers.utils.Results
 import com.pet001kambala.namopscontainers.utils.Results.Error.CODE.*

@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.viewModelScope
 import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.FragmentDropOffContainerBinding
 import com.pet001kambala.namopscontainers.model.TripStatus
@@ -13,6 +14,7 @@ import com.pet001kambala.namopscontainers.utils.DateUtil
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.copyOf
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 
 
 class DropOffContainerFragment : AbstractTripDetailsFragment() {
@@ -24,7 +26,7 @@ class DropOffContainerFragment : AbstractTripDetailsFragment() {
         savedInstanceState: Bundle?
     ): View {
         // Inflate the layout for this fragment
-        binding = FragmentDropOffContainerBinding.inflate(inflater,container,false)
+        binding = FragmentDropOffContainerBinding.inflate(inflater, container, false)
 
         return binding.root
     }
@@ -33,32 +35,51 @@ class DropOffContainerFragment : AbstractTripDetailsFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.trip = localTrip.trip
+        tripModel.currentLocalTrip.observe(viewLifecycleOwner) {
+            it?.let { localTrip ->
+                binding.trip = localTrip.trip
 
-        binding.memNote.inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                binding.memNote.inputType =
+                    InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
 
-        binding.register.setOnClickListener {
+                tripModel.viewModelScope.launch {
+                    val jobCard = tripModel.tripDao.loadCurrentJobCard()
 
-            localTrip.trip!!.dropOffDate = DateUtil.localDateToday()
-            val localTripCopy = localTrip.copyOf()!!
-            localTripCopy.trip!!.tripStatus = TripStatus.COMPLETED
 
-            tripModel.updateTripDetails(driver, localTripCopy).observe(viewLifecycleOwner) { results ->
-                when (results) {
-                    is Results.Loading -> showProgressBar("Saving end of trip info...")
-                    is Results.Success<*> -> {
-                        endProgressBar()
-                        showToast("Saved.")
-                        navController.popBackStack()
+                    binding.register.setOnClickListener {
 
-                        /**
-                         * Clear the trip
-                         */
-                        val results = tripModel.completeTrip()
-                    }
-                    else -> {
-                        endProgressBar()
-                        parseRepoResults(results)
+                        localTrip.trip!!.dropOffDate = DateUtil.localDateToday()
+                        val localTripCopy = localTrip.copyOf()!!
+                        localTripCopy.trip!!.tripStatus = TripStatus.COMPLETED
+
+                        val jobCardCopy =
+                            jobCard.copyOf().also {//filter out jobcarditem of interest
+                                it?.jobCardItemList =
+                                    it?.jobCardItemList?.filterNot { it.containerNo == null }
+                            }
+                        jobCardCopy?.jobCardItemList?.forEach { //set those to completed
+                            it.jobCardCompleted = it.containerNo != null
+                        }
+
+                        tripModel.completeTrip(
+                            driver = driver,
+                            localTrip = localTripCopy,
+                            jobCard = jobCard!!
+                        )
+                            .observe(viewLifecycleOwner) { results ->
+                                when (results) {
+                                    is Results.Loading -> showProgressBar("Saving end of trip info...")
+                                    is Results.Success<*> -> {
+                                        endProgressBar()
+                                        showToast("Saved.")
+                                        navController.popBackStack()
+                                    }
+                                    else -> {
+                                        endProgressBar()
+                                        parseRepoResults(results)
+                                    }
+                                }
+                            }
                     }
                 }
             }

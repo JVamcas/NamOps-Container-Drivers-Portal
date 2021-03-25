@@ -2,6 +2,7 @@ package com.pet001kambala.namopscontainers.utils
 
 internal interface Const {
     companion object {
+        val DefaultJobCardNo: String = "JA000"
         val JOB_CARD: String = "Job card"
         val TRIP: String = "Trip"
         val IS_PRE_ASSIGNED: String = "isPreAssigned"

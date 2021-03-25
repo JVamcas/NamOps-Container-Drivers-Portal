@@ -6,6 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.FragmentNewTripBinding
+import com.pet001kambala.namopscontainers.model.LocalTrip
+import com.pet001kambala.namopscontainers.model.Trip
 import com.pet001kambala.namopscontainers.model.TripStatus
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -25,9 +27,8 @@ class NewTripFragment : AbstractTripDetailsFragment() {
     @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.trip = localTrip.trip
 
-        //TODO check if there is truck and pre populate
+        val localTrip = LocalTrip().apply { trip = Trip().also { it.driver = driver } }
 
         truck?.let {
             //load truck odometer
@@ -42,6 +43,7 @@ class NewTripFragment : AbstractTripDetailsFragment() {
             }
 
             localTrip.trip?.tripStatus = TripStatus.WEIGH_EMPTY
+
             tripModel.createNewTrip(driver, localTrip).observe(viewLifecycleOwner) { result ->
                 when (result) {
                     is Results.Loading -> showProgressBar("Creating new trip")

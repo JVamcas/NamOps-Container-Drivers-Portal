@@ -31,8 +31,8 @@
     <string name="weigh_full_bison">Weigh Loaded Truck [Bison]</string>
     <string name="truck_weight">Truck weight</string>
     <string name="my_truck">My Truck</string>
-    <string name="first_container_number">1st Container Number</string>
-    <string name="_2nd_container_number">2nd Container Number</string>
-    <string name="_3rd_container_number">3rd Container Number</string>
+    <string name="first_container_number">Select 1st Container</string>
+    <string name="_2nd_container_number">Select 2nd Container</string>
+    <string name="_3rd_container_number">Select 3rd Container</string>
     <string name="extra_notes_if_any">Extra notes if any</string>
 </resources>

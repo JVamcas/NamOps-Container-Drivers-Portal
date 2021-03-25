@@ -7,11 +7,13 @@ import android.widget.ImageView
 import androidx.annotation.IdRes
 import androidx.databinding.BindingAdapter
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.pet001kambala.namopscontainers.model.JobCard
 import com.pet001kambala.namopscontainers.model.Trip
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isValidEmail
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isValidMobile
+import com.skydoves.powerspinner.PowerSpinnerView
 
 import com.squareup.picasso.Picasso
 
@@ -46,32 +48,27 @@ class BindingUtil {
         @JvmStatic
         @BindingAdapter(value = ["containerNo", "jobCard", "containerIndex", "trip"])
         fun validateSetJobCardNo(
-            mEditText: EditText,
+            mEditText: MaterialAutoCompleteTextView,
             containerNo: String?,
             jobCard: JobCard?,
             containerIndex: Int?,
             trip: Trip
         ) {
-            val isValidContainer =
+            val containerOnJobCard =
                 jobCard?.jobCardItemList?.any { it.containerNo == containerNo }
 
-            if (containerNo?.length == 7) {
-                if (isValidContainer == true) {
-                    when (containerIndex) {
-                        1 -> {
-                            trip.container1JobCardId = jobCard.jobCardNo
-                        }
-                        2 -> {
-                            trip.container2JobCardId = jobCard.jobCardNo
-                        }
-                        3 -> {
-                            trip.container3JobCardId = jobCard.jobCardNo
-                        }
-                    }
-                }
+            val jobCardNo = if(containerOnJobCard == true) jobCard.jobCardNo else Const.DefaultJobCardNo
+
+            when (containerIndex) {
+                1 -> trip.container1JobCardId = jobCardNo
+
+                2 -> trip.container2JobCardId = jobCardNo
+
+                3 -> trip.container3JobCardId = jobCardNo
             }
+
             mEditText.error =
-                if(isValidContainer == true) null else if (containerNo?.length != 7) "Invalid container number." else "Container is not on this JobCard."
+                if (containerNo?.length == 11) null else "Invalid container number."
         }
 
 

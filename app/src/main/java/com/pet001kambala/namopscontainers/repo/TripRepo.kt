@@ -78,7 +78,11 @@ class TripRepo(val app: Application) {
         }
     }
 
-    suspend fun updateTripDetails(passCode: String, localTrip: LocalTrip,jobCard: JobCard? = null): Results {
+    suspend fun updateTripDetails(
+        passCode: String,
+        localTrip: LocalTrip,
+        jobCard: JobCard? = null
+    ): Results {
 
         return try {
             withContext(Dispatchers.IO) {
@@ -86,11 +90,18 @@ class TripRepo(val app: Application) {
                 val requestBody = FormBody.Builder()
                     .add("passcode", passCode)
                     .add("trip", localTrip.trip.toJson())
-                    .build()
+
+                jobCard?.jobCardItemList?.let {
+                    requestBody.add(
+                        "job_card_items",
+                        jobCard.jobCardItemList.toJson()
+                    )
+                }
+                val req = requestBody.build()
 
                 val request = Request.Builder()
                     .url("$baseUrl/trip_update")
-                    .post(requestBody)
+                    .post(req)
                     .build()
 
 
