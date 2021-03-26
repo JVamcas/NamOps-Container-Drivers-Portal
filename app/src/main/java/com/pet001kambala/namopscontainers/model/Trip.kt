@@ -6,7 +6,8 @@ import java.time.LocalDateTime
 
 data class Trip(
 
-    override var id: Int? = null
+    override var id: Int? = null,
+    val weighBridgeName: String? = null
 
 ) : AbstractModel(id = id) {
 

@@ -14,20 +14,18 @@
     <string name="pre_assigned">Pre-Assigned Jobs</string>
 
     <string name="snap_nothing_here">Snap! There \'s nothing here.</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="truck_reg">Truck number e.g. H01</string>
     <string name="first_trailer">Trailer 1 plate number</string>
     <string name="second_trailer_reg">Trailer 2 plate number</string>
     <string name="truck_odo">Truck odometer reading</string>
     <string name="register">Save</string>
     <string name="current_location_name">Current Location Name</string>
-    <string name="weigh_empty">Weigh Empty Truck</string>
+    <string name="weigh_empty">Weigh Empty </string>
     <string name="pick_up">Pick Up Container</string>
     <string name="weigh_full">Weigh Loaded Truck</string>
     <string name="drop_off">Drop-Off Container</string>
     <string name="to_do_next">To Do Next</string>
-    <string name="weigh_full_bridge">Weigh Loaded Truck [Weighbridge]</string>
+    <string name="weigh_full_bridge">Weigh Loaded </string>
     <string name="weigh_full_bison">Weigh Loaded Truck [Bison]</string>
     <string name="truck_weight">Truck weight</string>
     <string name="my_truck">My Truck</string>

@@ -20,7 +20,7 @@ data class JobCard(
     var jobCardItemList: List<JobCardItem>? = null
 
     override fun toString(): String {
-        return "Pick up $pendingContainers containers from $pickUpLocationName"
+        return "Pick up $totalContainers containers from $pickUpLocationName"
     }
 
     fun filterPickedUpContainers(trip: Trip): List<JobCardItem>{

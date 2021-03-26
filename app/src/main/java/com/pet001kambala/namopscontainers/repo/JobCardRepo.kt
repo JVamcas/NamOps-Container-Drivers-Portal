@@ -29,7 +29,7 @@ class JobCardRepo {
                             totalContainers = item.value.size,
                             pickUpLocationName = item.value[0].pickUpLocationName ?: "Unknown",
                             pendingContainers = item.value.count { !it.wasPickedUp }).also{it.jobCardItemList = item.value}
-                    }
+                    }.filter { it.pendingContainers > 0 }
             } else arrayListOf()
 
             Results.Success(data = ArrayList(jobCardList), code = Results.Success.CODE.LOAD_SUCCESS)
@@ -50,20 +50,7 @@ class JobCardRepo {
                     pickUpLocationName = entry.value[0].pickUpLocationName ?: "Unknown",
                     pendingContainers = entry.value.count { !it.wasPickedUp })
                     .also { it.jobCardItemList = entry.value }
-            }
-//            print(other.toJson())
-//            val jobCardList = if (filteredJobCardItems.isNullOrEmpty()) {
-//               filteredJobCardItems
-//                    .groupBy { it.jobCardNo }
-//                    .map {
-//                        JobCard(
-//                            jobCardNo = it.key,
-//                            totalContainers = it.value.size,
-//                            pickUpLocationName = it.value[0].pickUpLocationName ?: "Unknown",
-//                            jobCardItemList = it.value,
-//                            pendingContainers = it.value.count { !it.wasPickedUp })
-//                    }
-//            } else arrayListOf()
+            }.filter { it.pendingContainers > 0 }
 
             Results.Success(data = ArrayList(other), code = Results.Success.CODE.LOAD_SUCCESS)
 

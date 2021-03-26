@@ -34,8 +34,10 @@ class NewTripFragment : AbstractTripDetailsFragment() {
 
         tripModel.viewModelScope.launch {
             val jobCard = tripModel.tripDao.loadCurrentJobCard()
-            val tempTrp = Trip().apply {
-                val jobCardItem = jobCard?.jobCardItemList!![0]
+            val jobCardItem = jobCard?.jobCardItemList!![0]
+            val tempTrp = Trip(
+                weighBridgeName = jobCardItem.weighBridgeName
+            ).apply {
                 this.driver = this@NewTripFragment.driver
                 useBison = jobCardItem.useBison
                 useWeighBridge = jobCardItem.useWeighBridge
@@ -43,7 +45,7 @@ class NewTripFragment : AbstractTripDetailsFragment() {
                 scanContainer = jobCardItem.scanContainer
                 pickUpLocationName = jobCardItem.pickUpLocationName
             }
-            val localTrip = LocalTrip().apply { trip = tempTrp}
+            val localTrip = LocalTrip().apply { trip = tempTrp }
             truck?.let {
                 //load truck odometer
             }

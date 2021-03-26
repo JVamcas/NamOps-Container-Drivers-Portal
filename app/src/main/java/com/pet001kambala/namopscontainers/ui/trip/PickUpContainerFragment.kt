@@ -55,7 +55,7 @@ class PickUpContainerFragment : AbstractTripDetailsFragment() {
                                 ArrayAdapter(
                                     requireContext(),
                                     R.layout.auto_select_layout,
-                                    jobCard?.jobCardItemList?.map { it.containerNo }?.toList()!!
+                                    jobCard?.jobCardItemList?.filterNot { it.wasPickedUp }?.map { it.containerNo }?.toList()!!
                                 )
                             )
                             it.threshold = 1
