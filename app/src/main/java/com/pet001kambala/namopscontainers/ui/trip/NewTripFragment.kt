@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.viewModelScope
 import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.FragmentNewTripBinding
 import com.pet001kambala.namopscontainers.model.LocalTrip
@@ -12,6 +13,7 @@ import com.pet001kambala.namopscontainers.model.TripStatus
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.copyOf
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 
 class NewTripFragment : AbstractTripDetailsFragment() {
 
@@ -29,41 +31,55 @@ class NewTripFragment : AbstractTripDetailsFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val localTrip = LocalTrip().apply { trip = Trip().also { it.driver = driver } }
 
-        truck?.let {
-            //load truck odometer
-        }
-
-        binding.trip = localTrip.trip
-
-        binding.register.setOnClickListener {
-
-            localTrip.trip?.apply {
-                truckReg = truck!!.truckReg
-                firstTrailerReg = truck!!.firstTrailerReg
-                secondTrailerReg = truck?.secondTrailerReg
+        tripModel.viewModelScope.launch {
+            val jobCard = tripModel.tripDao.loadCurrentJobCard()
+            val tempTrp = Trip().apply {
+                val jobCardItem = jobCard?.jobCardItemList!![0]
+                this.driver = this@NewTripFragment.driver
+                useBison = jobCardItem.useBison
+                useWeighBridge = jobCardItem.useWeighBridge
+                designatePickUpDate = jobCardItem.designatePickUpDate
+                scanContainer = jobCardItem.scanContainer
+                pickUpLocationName = jobCardItem.pickUpLocationName
+            }
+            val localTrip = LocalTrip().apply { trip = tempTrp}
+            truck?.let {
+                //load truck odometer
             }
 
-            localTrip.trip?.tripStatus = TripStatus.WEIGH_EMPTY
+            binding.trip = localTrip.trip
 
-            val localTripCopy = localTrip.copyOf().also {
-                it?.trip?.tripStatus = if (it?.trip?.useBison != true) TripStatus.WEIGH_EMPTY else TripStatus.PICK_UP
-            }
-
-            tripModel.createNewTrip(driver, localTripCopy!!).observe(viewLifecycleOwner) { result ->
-                when (result) {
-                    is Results.Loading -> showProgressBar("Creating new trip")
-                    is Results.Success<*> -> {
-                        endProgressBar()
-                        showToast("Success!")
-                        navController.popBackStack(R.id.homeFragment, false)
-                    }
-                    else -> {
-                        endProgressBar()
-                        parseRepoResults(result)
-                    }
+            binding.register.setOnClickListener {
+                localTrip.trip?.apply {
+                    truckReg = truck!!.truckReg
+                    firstTrailerReg = truck!!.firstTrailerReg
+                    secondTrailerReg = truck?.secondTrailerReg
                 }
+
+                localTrip.trip?.tripStatus =
+                    if (localTrip.trip?.useBison == true) TripStatus.PICK_UP else TripStatus.WEIGH_EMPTY
+
+                val localTripCopy = localTrip.copyOf().also {
+                    it?.trip?.tripStatus =
+                        if (it?.trip?.useBison != true) TripStatus.WEIGH_EMPTY else TripStatus.PICK_UP
+                }
+
+                tripModel.createNewTrip(driver, localTripCopy!!)
+                    .observe(viewLifecycleOwner) { result ->
+                        when (result) {
+                            is Results.Loading -> showProgressBar("Creating new trip")
+                            is Results.Success<*> -> {
+                                endProgressBar()
+                                showToast("Success!")
+                                navController.popBackStack(R.id.homeFragment, false)
+                            }
+                            else -> {
+                                endProgressBar()
+                                parseRepoResults(result)
+                            }
+                        }
+                    }
             }
         }
     }

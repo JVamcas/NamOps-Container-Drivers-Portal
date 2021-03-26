@@ -30,4 +30,8 @@ data class Driver(
         result = 31 * result + lastName.hashCode()
         return result
     }
+
+    fun isUnknownDriver(): Boolean{
+        return firstName.toLowerCase() =="unknown"
+    }
 }

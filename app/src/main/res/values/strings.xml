@@ -35,4 +35,6 @@
     <string name="_2nd_container_number">Select 2nd Container</string>
     <string name="_3rd_container_number">Select 3rd Container</string>
     <string name="extra_notes_if_any">Extra notes if any</string>
+    <string name="yes_btn">Yes</string>
+    <string name="no_btn">No</string>
 </resources>

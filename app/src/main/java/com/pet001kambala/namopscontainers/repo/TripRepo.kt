@@ -83,7 +83,9 @@ class TripRepo(val app: Application) {
 suspend fun updateTripDetails(
     passCode: String,
     localTrip: LocalTrip,
-    jobCard: JobCard? = null
+    jobCard: JobCard? = null,
+    wasPickedUp: Boolean = false,
+    jobCardComplete: Boolean = false
 ): Results {
 
     return try {
@@ -92,13 +94,16 @@ suspend fun updateTripDetails(
             val requestBody = FormBody.Builder()
                 .add("passcode", passCode)
                 .add("trip", localTrip.trip.toJson())
-
+                .add("wasPickedUp",wasPickedUp.toString())
+                .add("jobCardComplete",jobCardComplete.toString())
             jobCard?.jobCardItemList?.let {
                 requestBody.add(
                     "job_card_items",
                     jobCard.jobCardItemList.toJson()
                 )
             }
+
+
             val req = requestBody.build()
 
             val request = Request.Builder()

@@ -55,12 +55,12 @@ class DropOffContainerFragment : AbstractTripDetailsFragment() {
 
                         val jobCardCopy = jobCard.copyOf()
 
-                        jobCardCopy?.filterPickedUpContainers(localTrip.trip!!)?.forEach { it.jobCardCompleted = true }
+                        jobCardCopy?.jobCardItemList = jobCardCopy?.filterPickedUpContainers(trip = localTrip.trip!!)
 
                         tripModel.completeTrip(
                             driver = driver,
                             localTrip = localTripCopy,
-                            jobCard = jobCard!!
+                            jobCard = jobCardCopy!!
                         )
                             .observe(viewLifecycleOwner) { results ->
                                 when (results) {

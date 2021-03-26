@@ -106,7 +106,7 @@ class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHol
 
     override fun onModelClick(model: JobCard) {
         showWarningDialog(
-            warningTxt = "Are you sure to take this JobCard?",
+            warningTxt = "Would you like to take this JobCard?",
             object : WarningDialogListener {
                 override fun onOkWarning() {
                     tripModel.viewModelScope.launch {

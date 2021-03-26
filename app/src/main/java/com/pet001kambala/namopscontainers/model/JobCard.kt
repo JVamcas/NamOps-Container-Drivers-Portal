@@ -24,7 +24,7 @@ data class JobCard(
     }
 
     fun filterPickedUpContainers(trip: Trip): List<JobCardItem>{
-        val containers = arrayListOf(trip.container1,trip.container2,trip.container3)
+        val containers = arrayListOf(trip.container1,trip.container2,trip.container3).filterNotNull()
 
         return jobCardItemList?.filter { it.containerNo in containers }!!
     }

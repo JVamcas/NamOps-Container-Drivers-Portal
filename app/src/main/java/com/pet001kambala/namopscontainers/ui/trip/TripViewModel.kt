@@ -45,12 +45,20 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
     fun updateTripDetails(
         driver: Driver,
         localTrip: LocalTrip,
-        jobCard: JobCard? = null
+        jobCard: JobCard? = null,
+        wasPickedUp: Boolean = false,
+        jobCardComplete: Boolean = false
     ): LiveData<Results> {
         oPLiveData = liveData {
             emit(Results.Loading)
             try {
-                val results = tripRepo.updateTripDetails(driver.passCode, localTrip, jobCard)
+                val results = tripRepo.updateTripDetails(
+                    driver.passCode,
+                    localTrip,
+                    jobCard,
+                    wasPickedUp,
+                    jobCardComplete
+                )
                 if (results is Results.Success<*>) {
                     val data = results.data?.firstOrNull()
                     _currentTrip.value = data as? LocalTrip
@@ -133,7 +141,9 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
      * 2. remove [LocalTrip] and [JobCard] from room database
      * 3. set [LocalTrip] to null,
      */
-    fun completeTrip(driver: Driver, jobCard: JobCard, localTrip: LocalTrip): LiveData<Results> {
+    fun completeTrip(
+        driver: Driver, jobCard: JobCard, localTrip: LocalTrip
+    ): LiveData<Results> {
         oPLiveData = liveData {
             emit(Results.Loading)
             try {
@@ -141,7 +151,9 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
                 val results = tripRepo.updateTripDetails(
                     passCode = driver.passCode,
                     localTrip = localTrip,
-                    jobCard = jobCard
+                    jobCard = jobCard,
+                    wasPickedUp = true,
+                    jobCardComplete = true
                 )
 
                 emit(
@@ -150,8 +162,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
                         tripDao.clearTripTable()
                         _currentTrip.postValue(LocalTrip())
                         Results.Success<Trip>(code = Results.Success.CODE.UPDATE_SUCCESS)
-                    }
-                    else results
+                    } else results
                 )
 
             } catch (e: Exception) {

@@ -70,12 +70,13 @@ class PickUpContainerFragment : AbstractTripDetailsFragment() {
 
                             val jobCardCopy = jobCard.copyOf()
 
-                            jobCardCopy?.filterPickedUpContainers(trip = localTrip.trip!!)?.forEach { it.wasPickedUp = true }
+                            jobCardCopy?.jobCardItemList = jobCardCopy?.filterPickedUpContainers(trip = localTrip.trip!!)
 
                             tripModel.updateTripDetails(
                                 driver = driver,
                                 localTrip = localTripCopy,
-                                jobCard = jobCardCopy
+                                jobCard = jobCardCopy,
+                                wasPickedUp = true
                             )
 
                                 .observe(viewLifecycleOwner) { results ->
