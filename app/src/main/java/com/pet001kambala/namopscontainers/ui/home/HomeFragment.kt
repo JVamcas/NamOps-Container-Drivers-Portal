@@ -94,7 +94,7 @@ class HomeFragment : AbstractFragment() {
             weighFullBridgeBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_weighFullContainerFragment) }
             dropOffBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_dropOffContainerFragment) }
 
-            scanContainer.isVisible = trip.containerScanDate == null && trip.scanContainer
+//            scanContainer.isVisible = trip.containerScanDate == null && trip.scanContainer
 
         }
     }
