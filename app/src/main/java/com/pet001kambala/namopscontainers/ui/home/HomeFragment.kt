@@ -47,6 +47,7 @@ class HomeFragment : AbstractFragment() {
         tripModel.currentLocalTrip.observe(viewLifecycleOwner) {
             binding.trip = it?.trip
         }
+
         with(binding.tripLayout) {
             weighEmptyBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_weighEmptyTruckFragment) }
             pickupBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_pickUpContainerFragment) }

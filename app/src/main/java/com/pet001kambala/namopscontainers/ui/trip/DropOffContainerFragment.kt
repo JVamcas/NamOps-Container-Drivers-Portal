@@ -67,7 +67,7 @@ class DropOffContainerFragment : AbstractTripDetailsFragment() {
                                     is Results.Loading -> showProgressBar("Saving end of trip info...")
                                     is Results.Success<*> -> {
                                         endProgressBar()
-                                        showToast("Saved.")
+                                        showToast("Trip completed.")
                                         navController.popBackStack()
                                     }
                                     else -> {

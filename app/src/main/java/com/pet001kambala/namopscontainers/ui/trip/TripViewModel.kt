@@ -42,11 +42,15 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     @ExperimentalCoroutinesApi
-    fun updateTripDetails(driver: Driver, localTrip: LocalTrip,jobCard: JobCard? = null): LiveData<Results> {
+    fun updateTripDetails(
+        driver: Driver,
+        localTrip: LocalTrip,
+        jobCard: JobCard? = null
+    ): LiveData<Results> {
         oPLiveData = liveData {
             emit(Results.Loading)
             try {
-                val results = tripRepo.updateTripDetails(driver.passCode, localTrip,jobCard)
+                val results = tripRepo.updateTripDetails(driver.passCode, localTrip, jobCard)
                 if (results is Results.Success<*>) {
                     val data = results.data?.firstOrNull()
                     _currentTrip.value = data as? LocalTrip
@@ -142,34 +146,13 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
 
                 emit(
                     if (results is Results.Success<*>) {
-                        withContext(Dispatchers.Default) {
-                            val deferredRecords = listOf(
-                                async { tripDao.clearJobCardTable() },
-                                async { tripDao.clearTripTable() }
-                            )
-                            deferredRecords.awaitAll()
-
-                            _currentTrip = MutableLiveData<LocalTrip>()
-
-                            Results.Success<Trip>(code = Results.Success.CODE.UPDATE_SUCCESS)
-                        }
-                    } else results
+                        tripDao.clearJobCardTable()
+                        tripDao.clearTripTable()
+                        _currentTrip.postValue(LocalTrip())
+                        Results.Success<Trip>(code = Results.Success.CODE.UPDATE_SUCCESS)
+                    }
+                    else results
                 )
-
-            } catch (e: Exception) {
-                Results.Error(e)
-            }
-        }
-        return oPLiveData
-    }
-
-    fun setContainerPickedUp(driver: Driver, jobCard: JobCard): LiveData<Results> {
-        oPLiveData = liveData {
-            emit(Results.Loading)
-            try {
-
-                val jobCardItemList = jobCard.jobCardItemList?.forEach { it.wasPickedUp = true }
-
 
             } catch (e: Exception) {
                 Results.Error(e)
