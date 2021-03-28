@@ -48,12 +48,6 @@ abstract class AbstractFragment : Fragment() {
     var currentAccount: Account? = null
 
     @ExperimentalCoroutinesApi
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-//        currentAccount = accountModel.currentAccount.value
-    }
-
-    @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         handleBackClicks()
