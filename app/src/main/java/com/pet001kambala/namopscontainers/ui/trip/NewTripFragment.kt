@@ -10,9 +10,12 @@ import com.pet001kambala.namopscontainers.databinding.FragmentNewTripBinding
 import com.pet001kambala.namopscontainers.model.LocalTrip
 import com.pet001kambala.namopscontainers.model.Trip
 import com.pet001kambala.namopscontainers.model.TripStatus
+import com.pet001kambala.namopscontainers.model.Truck
+import com.pet001kambala.namopscontainers.repo.TripRepo
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.copyOf
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
 
 class NewTripFragment : AbstractTripDetailsFragment() {
@@ -27,12 +30,15 @@ class NewTripFragment : AbstractTripDetailsFragment() {
         return binding.root
     }
 
+    @InternalCoroutinesApi
     @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
 
         tripModel.viewModelScope.launch {
+
+
             val jobCard = tripModel.tripDao.loadCurrentJobCard()
             val jobCardItem = jobCard?.jobCardItemList!![0]
             val tempTrp = Trip(
@@ -46,11 +52,19 @@ class NewTripFragment : AbstractTripDetailsFragment() {
                 pickUpLocationName = jobCardItem.pickUpLocationName
             }
             val localTrip = LocalTrip().apply { trip = tempTrp }
-            truck?.let {
-                //load truck odometer
-            }
 
             binding.trip = localTrip.trip
+
+            truck?.let {truck ->
+                tripModel.loadTruckODO(truck = truck).observe(viewLifecycleOwner) {
+                    if (it is Results.Success<*>) {
+                        if (!it.data.isNullOrEmpty())
+                            localTrip.trip!!.startODM =
+                                (it.data as ArrayList<Truck>).first().odoMeter
+
+                    }else localTrip.trip!!.startODM = "0.0"
+                }
+            }
 
             binding.register.setOnClickListener {
                 localTrip.trip?.apply {

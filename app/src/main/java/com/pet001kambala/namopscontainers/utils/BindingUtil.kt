@@ -1,6 +1,7 @@
 package com.pet001kambala.namopscontainers.utils
 
 import android.text.Editable
+import android.text.TextUtils
 import android.text.TextWatcher
 import android.widget.EditText
 import android.widget.ImageView
@@ -11,10 +12,16 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import com.google.android.material.textfield.TextInputEditText
 import com.pet001kambala.namopscontainers.model.JobCard
 import com.pet001kambala.namopscontainers.model.Trip
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isValidContainerNo
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isValidEmail
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isValidMobile
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isValidOdo
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isValidPlateNo
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isValidVehicleNo
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isValidWeight
 
 import com.squareup.picasso.Picasso
+import java.util.regex.Pattern
 
 class BindingUtil {
 
@@ -27,10 +34,19 @@ class BindingUtil {
         }
 
         @JvmStatic
+        @BindingAdapter(value = ["errorMsg", "truckWeight"])
+        fun validateTruckWeight(mEditText: EditText, errorMsg: String?, truckWeight: Long?) {
+            mEditText.error = if (!truckWeight.isValidWeight()) errorMsg
+            else null
+        }
+
+        @JvmStatic
         @BindingAdapter(value = ["errorMsg", "truck_reg"])
         fun validateTruckReg(mEditText: EditText, errorMsg: String?, truckReg: String?) {
-            mEditText.error = if (truckReg.isNullOrEmpty()) errorMsg
-            else null
+            mEditText.error = when {
+                truckReg.isNullOrEmpty() || truckReg.isValidVehicleNo() -> null
+                else -> errorMsg
+            }
         }
 
         @JvmStatic
@@ -41,6 +57,68 @@ class BindingUtil {
             plateNumber: String?,
             isSecondTrailer: Boolean = false
         ) {
+            mEditText.error = when {
+                !isSecondTrailer && plateNumber.isValidPlateNo() -> null
+                isSecondTrailer && (plateNumber.isNullOrEmpty() || plateNumber.isValidPlateNo()) -> null
+                else -> errorMsg
+            }
+        }
+
+        @JvmStatic
+        @BindingAdapter(value = ["startLocation", "truckOdo"])
+        fun validateTripStart(
+            mButton: MaterialButton,
+            startLocation: String?,
+            truckOdo: String?
+        ) {
+
+            mButton.isEnabled =
+                !TextUtils.isEmpty(startLocation) && truckOdo.isValidOdo()
+
+        }
+
+        @JvmStatic
+        @BindingAdapter(value = ["truckWeight"])
+        fun validateTruckWeight(
+            mButton: MaterialButton,
+            truckWeight: Long?
+        ) {
+
+            mButton.isEnabled = truckWeight.isValidWeight()
+
+        }
+
+
+        @JvmStatic
+        @BindingAdapter(value = ["truckReg", "firstPlate", "secondPlate"])
+        fun validateTruckUpdate(
+            mButton: MaterialButton,
+            truckReg: String?,
+            firstPlate: String?,
+            secondPlate: String?
+        ) {
+            mButton.isEnabled =
+                truckReg.isValidVehicleNo()
+                        && firstPlate.isValidPlateNo()
+                        && (TextUtils.isEmpty(secondPlate) || secondPlate.isValidPlateNo())
+        }
+
+        @JvmStatic
+        @BindingAdapter(value = ["firstContainer", "secondContainer", "thirdContainer", "truckOdo", "locationName"])
+        fun validateContainerPickUp(
+            mButton: MaterialButton,
+            firstContainer: String?,
+            secondContainer: String?,
+            thirdContainer: String?,
+            truckOdo: String?,
+            locationName: String?
+        ) {
+            val containers = arrayListOf(firstContainer, secondContainer, thirdContainer)
+            mButton.isEnabled =
+                containers.any { it.isValidContainerNo() } //one of the containers must be valid
+                        && containers.all { TextUtils.isEmpty(it) || it.isValidContainerNo() } //if any container is set, it must be valid container number
+                        && truckOdo.isValidOdo()
+                        && !TextUtils.isEmpty(locationName)
 
         }
 
@@ -56,7 +134,11 @@ class BindingUtil {
             val containerOnJobCard =
                 jobCard?.jobCardItemList?.any { it.containerNo == containerNo }
 
-            val jobCardNo = if(containerOnJobCard == true) jobCard.jobCardNo else Const.DefaultJobCardNo
+            val jobCardNo = when {
+                !containerNo.isValidContainerNo() -> null
+                containerOnJobCard == true -> jobCard.jobCardNo
+                else -> Const.DefaultJobCardNo
+            }
 
             when (containerIndex) {
                 1 -> trip.container1JobCardId = jobCardNo
@@ -67,126 +149,7 @@ class BindingUtil {
             }
 
             mEditText.error =
-                if (containerNo?.length == 11) null else "Invalid container number."
-        }
-
-
-        @JvmStatic
-        @BindingAdapter(value = ["accountName", "cellphone"])
-        fun validatePhoneRegistration(
-            mButton: MaterialButton,
-            accountName: String?,
-            companyName: String?,
-            companyNumber: String?,
-            cellphone: String?
-        ) {
-            mButton.isEnabled =
-                isValidSelection(arrayListOf(accountName, companyName, companyNumber))
-                        && isValidMobile(cellphone)
-        }
-
-        @JvmStatic
-        @BindingAdapter(value = ["errorMsg", "emailAddressUpdate"])
-        fun validateEmailUpdate(mEditText: EditText, errorMsg: String?, emailAddress: String?) {
-            mEditText.error =
-                if (isValidEmail(emailAddress) || emailAddress.isNullOrEmpty()) null else errorMsg
-        }
-
-        @JvmStatic
-        @BindingAdapter(value = ["errorMsg", "cellphoneUpdate"])
-        fun validateCellUpdate(mEditText: EditText, errorMsg: String?, cellphone: String?) {
-            mEditText.error =
-                if (isValidMobile(cellphone) || cellphone.isNullOrEmpty()) null else errorMsg
-        }
-
-        @JvmStatic
-        @BindingAdapter(value = ["accountName", "cellphone", "email_address"])
-        fun validateProfileUpdate(
-            mButton: MaterialButton,
-            accountName: String?,
-            cellphone: String?,
-            email_address: String?
-        ) {
-            mButton.isEnabled =
-                isValidSelection(arrayListOf(accountName))
-                        && (email_address.isNullOrEmpty() || isValidEmail(email_address))
-                        && (cellphone.isNullOrEmpty() || isValidMobile(cellphone))
-        }
-
-
-        @JvmStatic
-        @BindingAdapter(value = ["errorMsg", "idMailCell"])
-        fun validateIDMailCell(
-            mEditText: TextInputEditText,
-            errorMsg: String?,
-            idMailCell: String?
-        ) {
-
-            mEditText.error =
-                if (idMailCell.isNullOrEmpty() || isValidMobile(idMailCell) || isValidEmail(
-                        idMailCell
-                    )
-                )
-                    null else errorMsg
-        }
-
-        @JvmStatic
-        @BindingAdapter(value = ["password"])
-        fun validatePassword(mEditText: EditText, password: String?) {
-            mEditText.error =
-                if (password.isNullOrEmpty() || password.length >= 8) null else
-                    "Password should be at least 8 characters long."
-        }
-
-        @JvmStatic
-        @BindingAdapter(value = ["password", "confirmPassword"])
-        fun confirmPassword(mEditText: EditText, password: String?, confirmPassword: String?) {
-            mEditText.error =
-                if (confirmPassword.isNullOrEmpty() || password != confirmPassword) "Passwords do not match." else null
-        }
-
-        @JvmStatic
-        @BindingAdapter(value = ["password", "idMailCell"], requireAll = false)
-        fun isValidLogin(mButton: MaterialButton, password: String?, idMailCell: String?) {
-            mButton.isEnabled =
-                (password?.length ?: 0 >= 8 && isValidEmail(idMailCell) || isValidMobile(
-                    idMailCell
-                ) || idMailCell?.length ?: 0 == 11)
-        }
-
-        @JvmStatic
-        @BindingAdapter(value = ["emailAddress", "password", "confirmPassword"])
-        fun validateEmailRegistration(
-            mButton: MaterialButton,
-            emailAddress: String?,
-            password: String?,
-            confirmPassword: String?
-        ) {
-            mButton.isEnabled = isValidEmail(emailAddress)
-                    || (isValidEmail(emailAddress) && password?.length ?: 0 >= 8 && confirmPassword == password)
-
-        }
-
-        @JvmStatic
-        @BindingAdapter(value = ["emailAddress", "cellphone", "isEmail"])
-        fun validateEmailCell(
-            mEditText: TextInputEditText,
-            emailAddress: String?,
-            cellphone: String?,
-            isEmail: Boolean = false
-        ) {
-            mEditText.error =
-                if (isEmail) {
-                    if (emailAddress.isNullOrEmpty() || !isValidEmail(emailAddress))
-                        "Enter a valid email address."
-                    else null
-                } else if (cellphone.isNullOrEmpty() || !isValidMobile(cellphone))
-                    "Enter valid phone number."
-                else null
-        }
-
-        private fun isValidSelection(list: ArrayList<String?>): Boolean {
-            return !list.any { it.isNullOrEmpty() || it.contains("Select") }
+                if (TextUtils.isEmpty(containerNo) || containerNo?.isValidContainerNo() == true) null else "Invalid container number."
         }
 
 
@@ -221,23 +184,5 @@ class BindingUtil {
             creator.into(mView)
         }
 
-
-        @JvmStatic
-        @BindingAdapter(value = ["email_address"])
-        fun validateEmail(mEditText: EditText, email_address: String?) {
-            mEditText.error =
-                if (!email_address.isNullOrEmpty() && !isValidEmail(email_address)) "Invalid Email address." else null
-        }
-
-        abstract class TextChangeLister : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {
-            }
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-        }
     }
 }

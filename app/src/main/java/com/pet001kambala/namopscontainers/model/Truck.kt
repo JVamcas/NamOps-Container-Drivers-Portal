@@ -39,4 +39,7 @@ class Truck(
             }
         }
 
+    @Transient
+    var odoMeter: String? = null
+
 }

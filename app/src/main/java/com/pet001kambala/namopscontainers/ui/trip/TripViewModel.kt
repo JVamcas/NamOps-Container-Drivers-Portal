@@ -14,7 +14,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
     private val tripRepo = TripRepo(app)
     private var _currentTrip = MutableLiveData<LocalTrip>()
     private var _currentTruck = MutableLiveData<Truck>()
-    lateinit var oPLiveData: LiveData<Results>
+//    lateinit var oPLiveData: LiveData<Results>
 
     val currentLocalTrip: LiveData<LocalTrip> = _currentTrip
     val currentTruck: LiveData<Truck> = _currentTruck
@@ -25,7 +25,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
 
     @ExperimentalCoroutinesApi
     fun createNewTrip(driver: Driver, localTrip: LocalTrip): LiveData<Results> {
-        oPLiveData = liveData {
+        val oPLiveData = liveData {
             emit(Results.Loading)
             try {
                 val results = tripRepo.createNewTrip(driver.passCode, localTrip)
@@ -49,7 +49,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
         wasPickedUp: Boolean = false,
         jobCardComplete: Boolean = false
     ): LiveData<Results> {
-        oPLiveData = liveData {
+        val oPLiveData = liveData {
             emit(Results.Loading)
             try {
                 val results = tripRepo.updateTripDetails(
@@ -84,7 +84,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun addTruck(truck: Truck): LiveData<Results> {
-        oPLiveData = liveData {
+        val oPLiveData = liveData {
             emit(Results.Loading)
             try {
                 tripDao.insertTruck(truck)
@@ -100,7 +100,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun updateTruck(truck: Truck): LiveData<Results> {
-        oPLiveData = liveData {
+        val oPLiveData = liveData {
             emit(Results.Loading)
             try {
                 tripDao.updateTruck(truck)
@@ -115,16 +115,33 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
         return oPLiveData
     }
 
+    @InternalCoroutinesApi
+    fun loadTruckODO(truck: Truck): LiveData<Results> {
+        val oPLiveData = liveData {
+            emit(Results.Loading)
+            try {
+                truck.odoMeter = tripRepo.findVehicleOdometer(truck.truckReg!!.toUpperCase())
+                emit(Results.Success(data = arrayListOf(truck),Results.Success.CODE.LOAD_SUCCESS))
+            } catch (e: Exception) {
+                Results.Error(e)
+            }
+        }
+        return oPLiveData
+    }
+
     fun loadCurrentTrip(driver: Driver): LiveData<Results> {
-        oPLiveData = liveData {
+        val oPLiveData = liveData {
             emit(Results.Loading)
             try {
                 val results = tripRepo.loadTripInfo(driver.passCode)
                 if (results is Results.Success<*>) {
                     if (!results.data.isNullOrEmpty()) {
-                        _currentTrip.value =
-                            results.data.filterIsInstance<LocalTrip>().firstOrNull()
-                        _currentTruck.value = results.data.filterIsInstance<Truck>().firstOrNull()
+                        results.data.filterIsInstance<LocalTrip>().firstOrNull()?.let {
+                            _currentTrip.value = it
+                        }
+                        results.data.filterIsInstance<Truck>().firstOrNull()?.let {
+                            _currentTruck.value = it
+                        }
                     }
                 }
                 emit(results)
@@ -144,7 +161,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
     fun completeTrip(
         driver: Driver, jobCard: JobCard, localTrip: LocalTrip
     ): LiveData<Results> {
-        oPLiveData = liveData {
+        val oPLiveData = liveData {
             emit(Results.Loading)
             try {
 

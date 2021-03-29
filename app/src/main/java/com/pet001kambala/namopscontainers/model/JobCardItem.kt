@@ -23,5 +23,8 @@ data class JobCardItem(
     val useBison: Boolean  = false,
     val useWeighBridge: Boolean = false,
     val designatePickUpDate: LocalDateTime? = null,
-    val weighBridgeName: String? = null
+    val weighBridgeName: String? = null,
+    val lngAgent: Int? = null,
+    val jobLog: Int? = null
+
 ) : AbstractModel()

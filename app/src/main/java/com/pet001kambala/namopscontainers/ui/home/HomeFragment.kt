@@ -12,6 +12,7 @@ import com.pet001kambala.namopscontainers.model.TripStatus
 import com.pet001kambala.namopscontainers.ui.AbstractFragment
 import com.pet001kambala.namopscontainers.utils.Const
 import com.pet001kambala.namopscontainers.utils.DateUtil
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.containerPickedUp
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.copyOf
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -50,39 +51,57 @@ class HomeFragment : AbstractFragment() {
 
         }
 
-        tripModel.currentLocalTrip.observe(viewLifecycleOwner) { localTrip ->
-            binding.trip = localTrip?.trip
+        tripModel.currentLocalTrip.observe(viewLifecycleOwner) {
+            binding.trip = it?.trip
 
-            binding.tripLayout.scanContainer.setOnClickListener {
-                showWarningDialog(warningTxt = "Have you thermally scanned this container?",
-                    object : WarningDialogListener {
-                        override fun onOkWarning() {
-                            val localCopy = localTrip.copyOf()
-                            tripModel.viewModelScope.launch {
-                                localTrip.trip?.containerScanDate = DateUtil.localDateToday()
-                                tripModel.updateTripDetails(
-                                    driver = driver,
-                                    localTrip = localCopy!!
-                                ).observe(viewLifecycleOwner) { results ->
-                                    when (results) {
-                                        is Results.Loading -> showProgressBar("Just a moment")
-                                        is Results.Success<*> -> {
-                                            endProgressBar()
-                                            showToast("Saved.")
-                                        }
-                                        else -> {
-                                            endProgressBar()
-                                            parseRepoResults(results)
+            it?.let { localTrip ->
+
+                val tempTrip = localTrip.trip
+
+                binding.tripLayout.dropOffBtn.isEnabled =
+                    tempTrip?.scanContainer == false || tempTrip?.containerScanDate != null
+
+                binding.tripLayout.scanContainer.setOnClickListener {
+
+                    showWarningDialog(warningTxt = "Have you thermally scanned this container?",
+                        object : WarningDialogListener {
+                            override fun onOkWarning() {
+                                val localCopy = localTrip.copyOf()
+                                tripModel.viewModelScope.launch {
+                                    localCopy?.trip?.containerScanDate = DateUtil.localDateToday()
+                                    tripModel.updateTripDetails(
+                                        driver = driver,
+                                        localTrip = localCopy!!
+                                    ).observe(viewLifecycleOwner) { results ->
+                                        when (results) {
+                                            is Results.Loading -> showProgressBar("Just a moment")
+                                            is Results.Success<*> -> {
+                                                endProgressBar()
+                                                showToast("Saved.")
+
+                                                binding.tripLayout.dropOffBtn.isEnabled = true
+
+                                            }
+                                            else -> {
+                                                endProgressBar()
+                                                parseRepoResults(results)
+                                            }
                                         }
                                     }
                                 }
                             }
-                        }
 
-                        override fun onCancelWarning() {
+                            override fun onCancelWarning() {
 
-                        }
-                    })
+                            }
+                        })
+
+                }
+                binding.tripLayout.scanContainer.isVisible =
+                    localTrip.trip?.containerScanDate == null
+                            && localTrip.trip?.scanContainer == true
+                            && localTrip.trip.containerPickedUp()
+
             }
         }
 
@@ -93,9 +112,6 @@ class HomeFragment : AbstractFragment() {
             weighFullBisonBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_weighFullContainerFragment) }
             weighFullBridgeBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_weighFullContainerFragment) }
             dropOffBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_dropOffContainerFragment) }
-
-            scanContainer.isVisible = trip?.containerScanDate == null && trip?.scanContainer == true
-
         }
     }
 

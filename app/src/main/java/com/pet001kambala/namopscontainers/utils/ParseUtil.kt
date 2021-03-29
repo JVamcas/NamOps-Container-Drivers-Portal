@@ -1,12 +1,14 @@
 package com.pet001kambala.namopscontainers.utils
 
-import android.accounts.Account
+
 import android.content.Context
 import android.text.TextUtils
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
 import com.pet001kambala.namopscontainers.model.AbstractModel
 import com.pet001kambala.namopscontainers.model.JobCardItem
+import com.pet001kambala.namopscontainers.model.Trip
+import com.pet001kambala.namopscontainers.model.TripStatus
 import java.io.File
 import java.lang.reflect.Type
 import java.text.SimpleDateFormat
@@ -75,7 +77,7 @@ class ParseUtil {
         var gson: Gson? = null
         val builder = GsonBuilder()
             .apply {
-                registerTypeAdapter(LocalDateTime::class.java, ParseUtil.LocalDateTimeSerializer())
+                registerTypeAdapter(LocalDateTime::class.java, LocalDateTimeSerializer())
                 registerTypeAdapter(
                     LocalDateTime::class.java,
                     LocalDateTimeDeserializer()
@@ -110,6 +112,12 @@ class ParseUtil {
 
         fun <T> T.toMap(): Map<String, Any> {
             return convert()
+        }
+
+        fun Trip?.containerPickedUp():Boolean{
+            return this!= null &&
+                    this.tripStatus !in arrayListOf(
+                        TripStatus.START, TripStatus.PICK_UP, TripStatus.WEIGH_EMPTY)
         }
 
 
@@ -161,6 +169,10 @@ class ParseUtil {
             }
         }
 
+
+        fun String?.isValidContainerNo() =
+            !TextUtils.isEmpty(this) && this?.length ?:0 == 11
+
         fun JobCardItem?.preAssigned() =
             this != null && this.id != 0
 
@@ -184,6 +196,10 @@ class ParseUtil {
             return StringBuilder(rtDir ?: "").append("/_").append(viewId).append("_.jpg")
                 .toString()
         }
+        fun String?.isValidVehicleNo(): Boolean {
+            val pattern = Pattern.compile("^[hH]\\d{2,}$")
+            return !this.isNullOrEmpty() && pattern.matcher(this).matches()
+        }
 
         @JvmStatic
         fun String?.toPhone(): String {
@@ -191,8 +207,15 @@ class ParseUtil {
             return "+264${this?.trimStart { it == '0' }}"
         }
 
-        fun Account.isIncompleteAccount() =
-            name.isNullOrEmpty()
+        fun String?.isValidPlateNo(): Boolean {
+            val pattern = Pattern.compile("^[nN]\\d+[aA-zZ]+$")
+            return !this.isNullOrEmpty() && pattern.matcher(this).matches()
+        }
+
+        fun String?.isValidOdo() =  !TextUtils.isEmpty(this) && this?.toDouble() ?: 0.0 > 0.0
+
+        fun Long?.isValidWeight() =
+            !TextUtils.isEmpty(this.toString()) && this !=null &&this >= 7000L
 
         fun isValidAuthCode(code: String?): Boolean {
             return code?.length ?: 0 == 6

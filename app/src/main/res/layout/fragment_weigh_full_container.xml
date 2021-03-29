@@ -18,8 +18,8 @@
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/startLocationName"
-                editContent="@{``+trip.fullTruckWeight}"
-                errorMsg="@{`Please input the weight.`}"
+                truckWeight="@{trip.fullTruckWeight}"
+                errorMsg="@{`Truck weight must be at least 7T`}"
                 android:layout_width="fill_parent"
                 android:layout_height="match_parent"
                 android:hint="@string/truck_weight"
@@ -36,6 +36,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="@string/register"
+            truckWeight="@{trip.fullTruckWeight}"
             android:textAllCaps="false"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/startLocationName_layout" />

@@ -10,10 +10,12 @@ import androidx.lifecycle.viewModelScope
 import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.FragmentDropOffContainerBinding
 import com.pet001kambala.namopscontainers.model.TripStatus
+import com.pet001kambala.namopscontainers.model.Truck
 import com.pet001kambala.namopscontainers.utils.DateUtil
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.copyOf
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
 
 
@@ -31,27 +33,40 @@ class DropOffContainerFragment : AbstractTripDetailsFragment() {
         return binding.root
     }
 
+    @InternalCoroutinesApi
     @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         tripModel.currentLocalTrip.observe(viewLifecycleOwner) {
             it?.let { localTrip ->
-                binding.trip = localTrip.trip
+
 
                 binding.memNote.inputType =
                     InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
 
                 tripModel.viewModelScope.launch {
-                    val jobCard = tripModel.tripDao.loadCurrentJobCard()
 
+                    binding.trip = localTrip.trip
+
+                    truck?.let {truck ->
+                        tripModel.loadTruckODO(truck = truck).observe(viewLifecycleOwner) {
+                            if (it is Results.Success<*>) {
+                                if (!it.data.isNullOrEmpty())
+                                    localTrip.trip!!.dropOffODM =
+                                        (it.data as ArrayList<Truck>).first().odoMeter
+
+                            }else localTrip.trip?.dropOffODM = "0.0"
+                        }
+                    }
+
+                    val jobCard = tripModel.tripDao.loadCurrentJobCard()
 
                     binding.register.setOnClickListener {
 
                         localTrip.trip!!.dropOffDate = DateUtil.localDateToday()
                         val localTripCopy = localTrip.copyOf()!!
                         localTripCopy.trip!!.tripStatus = TripStatus.COMPLETED
-
 
                         val jobCardCopy = jobCard.copyOf()
 

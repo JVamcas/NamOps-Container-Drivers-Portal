@@ -16,11 +16,12 @@ import org.apache.commons.csv.CSVFormat
 import java.io.StringReader
 import kotlin.math.round
 
-class TripRepo(val app: Application) {
+class TripRepo(val app: Application? = null) {
 
     var baseUrl: String = "http://160.242.10.200:8081/namops_driver_portal"
     private val client = OkHttpClient.Builder().build()
-    private val tripDao by lazy { TripDatabase.getDatabase(app).tripDao() }
+    private val tripDao by lazy { TripDatabase.getDatabase(app!!).tripDao() }
+
 
     /**
      * 1. First write to the backend persist returned trip to the local db

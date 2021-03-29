@@ -14,9 +14,11 @@ import com.pet001kambala.namopscontainers.databinding.FragmentNewTripBinding
 import com.pet001kambala.namopscontainers.databinding.FragmentPickUpContainerBinding
 import com.pet001kambala.namopscontainers.model.JobCardItem
 import com.pet001kambala.namopscontainers.model.TripStatus
+import com.pet001kambala.namopscontainers.model.Truck
 import com.pet001kambala.namopscontainers.utils.*
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.copyOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
 
 class PickUpContainerFragment : AbstractTripDetailsFragment() {
@@ -32,68 +34,81 @@ class PickUpContainerFragment : AbstractTripDetailsFragment() {
         return binding.root
     }
 
+    @InternalCoroutinesApi
     @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         tripModel.currentLocalTrip.observe(viewLifecycleOwner) {
             it?.let { localTrip ->
-                tripModel.viewModelScope.launch {
 
+
+
+
+                tripModel.viewModelScope.launch {
                     binding.trip = localTrip.trip
 
-                    tripModel.viewModelScope.launch {
-                        val jobCard = tripModel.tripDao.loadCurrentJobCard()
-                        binding.jobcard = jobCard
+                    truck?.let {truck ->
+                        tripModel.loadTruckODO(truck = truck).observe(requireActivity()) {
+                            if (it is Results.Success<*>) {
+                                if (!it.data.isNullOrEmpty())
+                                    localTrip.trip!!.pickUpODM =
+                                        (it.data as ArrayList<Truck>).first().odoMeter
 
-                        arrayListOf(
-                            binding.container1,
-                            binding.container2,
-                            binding.container3
-                        ).forEach {
-                            it.setAdapter(
-                                ArrayAdapter(
-                                    requireContext(),
-                                    R.layout.auto_select_layout,
-                                    jobCard?.jobCardItemList?.filterNot { it.wasPickedUp }?.map { it.containerNo }?.toList()!!
-                                )
-                            )
-                            it.threshold = 1
+                            }else localTrip.trip!!.pickUpODM = "0.0"
                         }
+                    }
 
-                        binding.register.setOnClickListener {
+                    val jobCard = tripModel.tripDao.loadCurrentJobCard()
+                    binding.jobcard = jobCard
 
-                            localTrip.trip!!.actualPickUpDate = DateUtil.localDateToday()
-                            val localTripCopy = localTrip.copyOf()!!
-                            localTripCopy.trip!!.tripStatus =
-                                if (localTrip.trip?.useBison == true) TripStatus.BISON else TripStatus.WEIGH_FULL
-
-                            val jobCardCopy = jobCard.copyOf()
-
-                            jobCardCopy?.jobCardItemList = jobCardCopy?.filterPickedUpContainers(trip = localTrip.trip!!)
-
-                            tripModel.updateTripDetails(
-                                driver = driver,
-                                localTrip = localTripCopy,
-                                jobCard = jobCardCopy,
-                                wasPickedUp = true
+                    arrayListOf(
+                        binding.container1,
+                        binding.container2,
+                        binding.container3
+                    ).forEach {
+                        it.setAdapter(
+                            ArrayAdapter(
+                                requireContext(),
+                                R.layout.auto_select_layout,
+                                jobCard?.jobCardItemList?.filterNot { it.wasPickedUp }
+                                    ?.map { it.containerNo }?.toList()!!
                             )
+                        )
+                        it.threshold = 1
+                    }
 
-                                .observe(viewLifecycleOwner) { results ->
-                                    when (results) {
-                                        is Results.Loading -> showProgressBar("Saving...")
-                                        is Results.Success<*> -> {
-                                            endProgressBar()
-                                            showToast("Saved.")
-                                            navController.popBackStack()
-                                        }
-                                        else -> {
-                                            endProgressBar()
-                                            parseRepoResults(results)
-                                        }
+                    binding.register.setOnClickListener {
+
+                        localTrip.trip!!.actualPickUpDate = DateUtil.localDateToday()
+                        val localTripCopy = localTrip.copyOf()!!
+
+                        localTripCopy.trip!!.tripStatus =
+                            if (localTrip.trip?.useBison == true) TripStatus.BISON else TripStatus.WEIGH_FULL
+
+                        val jobCardCopy = jobCard.copyOf()
+                        jobCardCopy?.jobCardItemList =
+                            jobCardCopy?.filterPickedUpContainers(trip = localTripCopy.trip!!)
+
+                        tripModel.updateTripDetails(
+                            driver = driver,
+                            localTrip = localTripCopy,
+                            jobCard = jobCardCopy,
+                            wasPickedUp = true
+                        ).observe(viewLifecycleOwner) { results ->
+                                when (results) {
+                                    is Results.Loading -> showProgressBar("Saving...")
+                                    is Results.Success<*> -> {
+                                        endProgressBar()
+                                        showToast("Saved.")
+                                        navController.popBackStack()
+                                    }
+                                    else -> {
+                                        endProgressBar()
+                                        parseRepoResults(results)
                                     }
                                 }
-                        }
+                            }
                     }
                 }
             }

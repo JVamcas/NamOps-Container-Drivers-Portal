@@ -127,6 +127,11 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/register"
             style="@style/save_btn_outlined"
+            firstContainer="@{trip.container1}"
+            secondContainer="@{trip.container2}"
+            thirdContainer="@{trip.container3}"
+            truckOdo="@{trip.pickUpODM}"
+            locationName="@{trip.pickUpLocationName}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
