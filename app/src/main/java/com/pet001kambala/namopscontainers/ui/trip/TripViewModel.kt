@@ -14,14 +14,12 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
     private val tripRepo = TripRepo(app)
     private var _currentTrip = MutableLiveData<LocalTrip>()
     private var _currentTruck = MutableLiveData<Truck>()
-//    lateinit var oPLiveData: LiveData<Results>
 
     val currentLocalTrip: LiveData<LocalTrip> = _currentTrip
     val currentTruck: LiveData<Truck> = _currentTruck
 
     private val db by lazy { TripDatabase.getDatabase(app.baseContext) }
     val tripDao by lazy { db.tripDao() }
-
 
     @ExperimentalCoroutinesApi
     fun createNewTrip(driver: Driver, localTrip: LocalTrip): LiveData<Results> {
@@ -152,6 +150,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
         }
         return oPLiveData
     }
+    fun loadCurrentJobCard():
 
     /**
      * 1. set JobCardItem completed in backend

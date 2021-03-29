@@ -8,6 +8,7 @@ import com.pet001kambala.namopscontainers.model.*
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.convert
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.toJson
 import com.pet001kambala.namopscontainers.utils.Results
+import com.skydoves.powerspinner.createPowerSpinnerView
 import kotlinx.coroutines.*
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
@@ -80,6 +81,42 @@ class TripRepo(val app: Application? = null) {
         )
     }
 }
+
+    private suspend fun loadDriverRecentTrip(passCode: String): Results {
+        val url = "http://160.242.10.200:8081/namops_driver_portal/recent_incomplete_trip?passcode=$passCode"
+        val client = OkHttpClient.Builder().build()
+        val request = Request.Builder()
+            .url(url)
+            .build()
+
+        return try {
+            withContext(Dispatchers.IO) {
+                val results = client.newCall(request).execute()//wait for the results from api
+                val data = results.body?.string()
+
+                val jsonTree = JsonParser.parseString(data).asJsonObject
+
+                when (jsonTree.get("Status").toString().replace("\"", "")) {
+                    "Success" -> {
+                        val jsonData = jsonTree.get("data").toString()
+                        val trip = if (jsonData.isEmpty())
+                            null else jsonData.convert<Trip>()
+
+                        Results.Success(
+                            data = arrayListOf(trip).filterNotNull() as ArrayList<Trip>,
+                            code = Results.Success.CODE.LOAD_SUCCESS
+                        )
+                    }
+                    "Invalid Auth" -> Results.Error(AbstractModel.InvalidAuthCredException())
+
+                    else -> Results.Error(AbstractModel.ServerException())
+                }
+            }
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+            Results.Error(e)
+        }
+    }
 
 suspend fun updateTripDetails(
     passCode: String,
@@ -185,7 +222,27 @@ suspend fun loadTripInfo(passCode: String): Results {
                     }
                 }
             }
-            //todo if localTrip is null fetch latest incomplete trip from database
+            if(localTrip == null){
+                val results = loadDriverRecentTrip(passCode = passCode)
+                if(results is Results.Success<*> && !results.data.isNullOrEmpty()){
+                    val tempTrip =  results.data[0] as Trip
+                    val tempTruck = Truck().apply {
+                        truckReg = tempTrip.truckReg
+                        firstTrailerReg = tempTrip.firstTrailerReg
+                        secondTrailerReg = tempTrip.secondTrailerReg
+                    }
+                    responseArray = arrayListOf(tempTrip,tempTruck)
+                    val tempLocalTrip = LocalTrip().apply {
+                        awaitingNetwork = false
+                        trip = tempTrip
+                    }
+
+                    tripDao.insertTrip(tempLocalTrip)
+                    tripDao.insertTruck(tempTruck)
+
+                }
+                else responseArray = arrayListOf()
+            }
 
             Results.Success(data = responseArray, code = Results.Success.CODE.LOAD_SUCCESS)
         }
