@@ -104,6 +104,17 @@ class BindingUtil {
         }
 
         @JvmStatic
+        @BindingAdapter(value = ["surname", "password"])
+        fun validateAuth(
+            mButton: MaterialButton,
+            surname: String?,
+            password: String?,
+        ) {
+            mButton.isEnabled = !TextUtils.isEmpty(surname) && !TextUtils.isEmpty(password)
+
+        }
+
+        @JvmStatic
         @BindingAdapter(value = ["firstContainer", "secondContainer", "thirdContainer", "truckOdo", "locationName"])
         fun validateContainerPickUp(
             mButton: MaterialButton,
@@ -151,6 +162,8 @@ class BindingUtil {
             mEditText.error =
                 if (TextUtils.isEmpty(containerNo) || containerNo?.isValidContainerNo() == true) null else "Invalid container number."
         }
+
+
 
 
         /***

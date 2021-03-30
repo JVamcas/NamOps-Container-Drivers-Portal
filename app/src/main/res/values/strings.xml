@@ -35,4 +35,7 @@
     <string name="extra_notes_if_any">Extra notes if any</string>
     <string name="yes_btn">Yes</string>
     <string name="no_btn">No</string>
+    <string name="password">Password</string>
+    <string name="login_btn_txt">Login</string>
+    <string name="surname">Surname</string>
 </resources>

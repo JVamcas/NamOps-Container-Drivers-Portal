@@ -26,7 +26,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
         val oPLiveData = liveData {
             emit(Results.Loading)
             try {
-                val results = tripRepo.createNewTrip(driver.passCode, localTrip)
+                val results = tripRepo.createNewTrip(driver, localTrip)
                 if (results is Results.Success<*>) {
                     val data = results.data?.firstOrNull()
                     _currentTrip.value = data as? LocalTrip
@@ -51,7 +51,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
             emit(Results.Loading)
             try {
                 val results = tripRepo.updateTripDetails(
-                    driver.passCode,
+                    driver,
                     localTrip,
                     jobCard,
                     wasPickedUp,
@@ -131,7 +131,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
         val oPLiveData = liveData {
             emit(Results.Loading)
             try {
-                val results = tripRepo.loadTripInfo(driver.passCode)
+                val results = tripRepo.loadTripInfo(driver)
                 if (results is Results.Success<*>) {
                     if (!results.data.isNullOrEmpty()) {
                         results.data.filterIsInstance<LocalTrip>().firstOrNull()?.let {
@@ -150,7 +150,35 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
         }
         return oPLiveData
     }
-    fun loadCurrentJobCard():
+
+    fun loadCurrentJobCard(driver: Driver): LiveData<Results> {
+        //1. load current trip - to get the job card no
+        //2. load current job cards
+        //3. recreate the jobcard, trip and save on database
+        val oPLiveData = liveData {
+            emit(Results.Loading)
+            try {
+                val results = tripRepo.loadTripInfo(driver)
+                if (results is Results.Success<*>) {
+                    if (!results.data.isNullOrEmpty()) {
+                        results.data.filterIsInstance<LocalTrip>().firstOrNull()?.let {
+                            _currentTrip.value = it
+                        }
+                        results.data.filterIsInstance<Truck>().firstOrNull()?.let {
+                            _currentTruck.value = it
+                        }
+                    }
+                }
+                emit(results)
+
+            } catch (e: Exception) {
+                Results.Error(e)
+            }
+        }
+        return oPLiveData
+    }
+
+
 
     /**
      * 1. set JobCardItem completed in backend
@@ -165,7 +193,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
             try {
 
                 val results = tripRepo.updateTripDetails(
-                    passCode = driver.passCode,
+                    driver = driver,
                     localTrip = localTrip,
                     jobCard = jobCard,
                     wasPickedUp = true,

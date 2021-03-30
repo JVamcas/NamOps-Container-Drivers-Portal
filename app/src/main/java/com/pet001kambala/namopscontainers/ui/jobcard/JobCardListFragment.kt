@@ -12,6 +12,7 @@ import com.pet001kambala.namopscontainers.databinding.FragmentJobcardListBinding
 import com.pet001kambala.namopscontainers.model.Driver
 import com.pet001kambala.namopscontainers.model.JobCard
 import com.pet001kambala.namopscontainers.repo.JobCardRepo
+import com.pet001kambala.namopscontainers.ui.AbstractFragment
 import com.pet001kambala.namopscontainers.ui.AbstractListFragment
 import com.pet001kambala.namopscontainers.ui.trip.TripViewModel
 import com.pet001kambala.namopscontainers.utils.Const
@@ -53,41 +54,43 @@ class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHol
 
         handleRecycleView(binding.accountsRecycler, this)
 
-        jobCardModel.viewModelScope.launch {
-            binding.jobCardCount = 1
-            showProgressBar("Just a moment...")
+        driver?.let { tempDriver ->
 
-            if (isPreAssignedJobs) {
-                val results = JobCardRepo().loadPreAssignedJobCards(driver)
-                endProgressBar()
-                if (results is Results.Success<*>) {
-                    val data = results.data as ArrayList<JobCard>
+            jobCardModel.viewModelScope.launch {
+                binding.jobCardCount = 1
+                showProgressBar("Just a moment...")
 
-                    binding.jobCardCount = data.size
+                if (isPreAssignedJobs) {
+                    val results = JobCardRepo().loadPreAssignedJobCards(tempDriver)
+                    endProgressBar()
+                    if (results is Results.Success<*>) {
+                        val data = results.data as ArrayList<JobCard>
 
-                    if (!data.isNullOrEmpty()) {
-                        mAdapter.modelList = data
                         binding.jobCardCount = data.size
-                    }
-                } else
-                    parseRepoResults(results)
 
+                        if (!data.isNullOrEmpty()) {
+                            mAdapter.modelList = data
+                            binding.jobCardCount = data.size
+                        }
+                    } else
+                        parseRepoResults(results)
 
-            } else {
+                } else {
 
-                val results = JobCardRepo().loadUnAssignedJobCards(driver)
-                endProgressBar()
-                if (results is Results.Success<*>) {
-                    val data = results.data as ArrayList<JobCard>
+                    val results = JobCardRepo().loadUnAssignedJobCards(tempDriver)
+                    endProgressBar()
+                    if (results is Results.Success<*>) {
+                        val data = results.data as ArrayList<JobCard>
 
-                    binding.jobCardCount = data.size
-
-                    if (!data.isNullOrEmpty()) {
-                        mAdapter.modelList = data
                         binding.jobCardCount = data.size
-                    }
-                } else
-                    parseRepoResults(results)
+
+                        if (!data.isNullOrEmpty()) {
+                            mAdapter.modelList = data
+                            binding.jobCardCount = data.size
+                        }
+                    } else
+                        parseRepoResults(results)
+                }
             }
         }
     }
@@ -110,11 +113,11 @@ class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHol
             object : WarningDialogListener {
                 override fun onOkWarning() {
                     tripModel.viewModelScope.launch {
-                        try{
+                        try {
                             tripModel.tripDao.clearJobCardTable()
                             tripModel.tripDao.insertJobCard(model)
+                        } catch (e: Exception) {
                         }
-                        catch (e:Exception){}
 
 
                         val bundle = Bundle().also { it.putString(Const.JOB_CARD, model.toJson()) }
@@ -124,6 +127,7 @@ class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHol
                         )
                     }
                 }
+
                 override fun onCancelWarning() {
 
                 }

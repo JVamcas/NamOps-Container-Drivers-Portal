@@ -1,6 +1,5 @@
 package com.pet001kambala.namopscontainers.ui
 
-import android.accounts.Account
 import android.app.Dialog
 import android.os.Bundle
 import android.view.Gravity
@@ -15,7 +14,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
-import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.pet001kambala.namopscontainers.R
@@ -24,15 +22,14 @@ import com.pet001kambala.namopscontainers.databinding.WarningDialogBinding
 import com.pet001kambala.namopscontainers.model.Driver
 import com.pet001kambala.namopscontainers.model.Truck
 import com.pet001kambala.namopscontainers.ui.account.AccountViewModel
+import com.pet001kambala.namopscontainers.ui.account.LoginFragment
 import com.pet001kambala.namopscontainers.ui.home.HomeFragment
 import com.pet001kambala.namopscontainers.ui.trip.AbstractTripDetailsFragment
-import com.pet001kambala.namopscontainers.ui.trip.NewTripFragment
 import com.pet001kambala.namopscontainers.ui.trip.TripViewModel
 import com.pet001kambala.namopscontainers.utils.Results
 import com.pet001kambala.namopscontainers.utils.Results.Error.CODE.*
 import com.pet001kambala.namopscontainers.utils.Results.Success.CODE.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class AbstractFragment : Fragment() {
@@ -41,11 +38,9 @@ abstract class AbstractFragment : Fragment() {
     lateinit var navController: NavController
     private lateinit var mProgressbarBinding: ProgressbarBinding
     val accountModel: AccountViewModel by activityViewModels()
-    val driver = Driver(firstName = "Sergio", lastName = "Figueiredo", passCode = "DR0001", id = 3)
+    var driver: Driver? = null
     var truck: Truck? = null
     val tripModel: TripViewModel by activityViewModels()
-
-    var currentAccount: Account? = null
 
     @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -53,36 +48,46 @@ abstract class AbstractFragment : Fragment() {
         handleBackClicks()
         navController = requireActivity().findNavController(R.id.nav_host_fragment)
 
-//        accountModel.authState.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
-////            it?.let {
-////                if (it != AccountViewModel.AuthState.AUTHENTICATED
-////                    && this@AbstractFragment !is AbstractAuthFragment
-////                )
-////                    navController.navigate(R.id.action_global_nav_auth)
-////            }
-//        })
-        tripModel.currentTruck.observe(viewLifecycleOwner) {
+        tripModel.currentTruck.observe(requireActivity()) {
             it?.let {
                 truck = it
             }
         }
 
-        if (this is AbstractTripDetailsFragment || this is HomeFragment) {
-            tripModel.loadCurrentTrip(driver).observe(viewLifecycleOwner) { result ->
-                when (result) {
-                    is Results.Loading -> showProgressBar("Loading current trip info...")
-                    is Results.Success<*> -> {
-                        endProgressBar()
-                        if (truck == null)
-                            navController.navigate(R.id.action_newTripFragment_to_updateTruckDetailsFragment)
-                    }
-                    else -> {
-                        endProgressBar()
-                        parseRepoResults(result)
+        driver = accountModel.currentDriver.value
+        accountModel.currentDriver.observe(viewLifecycleOwner) {
+            if (driver == null && this@AbstractFragment !is LoginFragment)
+                navController.navigate(R.id.action_global_loginFragment)
+
+        }
+
+        when {
+            driver == null && this@AbstractFragment !is LoginFragment ->
+                navController.navigate(
+                    R.id.action_global_loginFragment
+                )
+            else -> {
+                driver?.let {
+                    if (this is AbstractTripDetailsFragment || this is HomeFragment) {
+                        tripModel.loadCurrentTrip(it).observe(requireActivity()) { result ->
+                            when (result) {
+                                is Results.Loading -> showProgressBar("Loading current trip info...")
+                                is Results.Success<*> -> {
+                                    endProgressBar()
+                                    if (truck == null)
+                                        navController.navigate(R.id.action_newTripFragment_to_updateTruckDetailsFragment)
+                                }
+                                else -> {
+                                    endProgressBar()
+                                    parseRepoResults(result)
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
+
     }
 
 
@@ -181,7 +186,7 @@ abstract class AbstractFragment : Fragment() {
                 INCORRECT_EMAIL_PASSWORD_COMBO -> showToast("Err: Incorrect email or password.")
                 INVALID_AUTH_CODE -> showToast("Err: Incorrect authentication code.")
                 PHONE_VERIFICATION_CODE_EXPIRED -> showToast("Err: Verification code expired.")
-                INVALID_CON_AUTH -> showToast("Err: Incorrect authentication details.")
+                INVALID_CON_AUTH -> showToast("Err: Incorrect surname or password.")
                 CONNECTION_TIMEOUT -> showToast("Err: Connection timeout.")
                 SERVER_ERR -> showToast("Err: Server error.")
                 NO_CONNECTION -> showToast("Err: No connection!")

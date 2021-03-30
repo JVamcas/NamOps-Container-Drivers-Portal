@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            tools:context=".ui.authentication.EmailRegistrationFragment">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/email_layout"
+                android:layout_marginTop="5dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+
+                >
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/email"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:padding="9dp"
+                    android:hint="@string/surname"
+                    android:inputType="textEmailAddress"
+                    android:text="@={auth.surname}"
+                    android:singleLine="true"
+                    editContent="@{auth.surname}"
+                    errorMsg="@{`Enter your surname.`}"
+                    /></com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:id="@+id/password_layout"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/email_layout"
+                >
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/password"
+                    android:layout_width="fill_parent"
+                    android:layout_height="match_parent"
+                    android:padding="9dp"
+                    android:hint="@string/password"
+                    android:text="@={auth.passcode}"
+                    android:inputType="textPassword"
+                    editContent="@{auth.passcode}"
+                    errorMsg="@{`Enter your password`}"
+                    /></com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/login_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="end"
+                android:textAllCaps="false"
+                style="@style/save_btn_outlined"
+                app:layout_constraintTop_toBottomOf="@id/password_layout"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:text="@string/login_btn_txt"
+                surname="@{auth.surname}"
+                password="@{auth.passcode}"
+                />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <data>
+        <import type="android.view.View"/>
+
+        <variable
+            name="auth"
+            type="com.pet001kambala.namopscontainers.model.Auth" />
+    </data>
+</layout>

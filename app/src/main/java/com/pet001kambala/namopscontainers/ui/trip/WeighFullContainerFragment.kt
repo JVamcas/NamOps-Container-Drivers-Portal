@@ -44,7 +44,7 @@ class WeighFullContainerFragment : AbstractTripDetailsFragment() {
                     val localTripCopy = localTrip.copyOf()!!
                     localTripCopy.trip!!.tripStatus = TripStatus.DROP_OFF
 
-                    tripModel.updateTripDetails(driver, localTripCopy)
+                    tripModel.updateTripDetails(driver!!, localTripCopy)
                         .observe(viewLifecycleOwner) { results ->
                             when (results) {
                                 is Results.Loading -> showProgressBar("Saving truck weight...")

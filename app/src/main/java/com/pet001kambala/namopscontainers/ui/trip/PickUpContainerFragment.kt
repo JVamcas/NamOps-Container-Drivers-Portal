@@ -91,7 +91,7 @@ class PickUpContainerFragment : AbstractTripDetailsFragment() {
                             jobCardCopy?.filterPickedUpContainers(trip = localTripCopy.trip!!)
 
                         tripModel.updateTripDetails(
-                            driver = driver,
+                            driver = driver!!,
                             localTrip = localTripCopy,
                             jobCard = jobCardCopy,
                             wasPickedUp = true

@@ -1,27 +1,49 @@
 package com.pet001kambala.namopscontainers.ui.account
 
+import android.app.Application
 import androidx.lifecycle.*
+import com.pet001kambala.namopscontainers.model.Auth
+import com.pet001kambala.namopscontainers.model.Driver
 import com.pet001kambala.namopscontainers.repo.AccountRepo
+import com.pet001kambala.namopscontainers.utils.Results
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-class AccountViewModel: ViewModel() {
+class AccountViewModel(app: Application) : AndroidViewModel(app) {
 
-    private val accountRepo = AccountRepo()
+    private val accountRepo = AccountRepo(app)
 
-    enum class AuthState {
-        AUTHENTICATED, UNAUTHENTICATED, EMAIL_NOT_VERIFIED
+    private var _currentDriver = MutableLiveData<Driver>()
+    val currentDriver: LiveData<Driver> = _currentDriver
+
+
+    @ExperimentalCoroutinesApi
+    fun login(auth: Auth? = null): LiveData<Results> {
+        return liveData {
+            emit(Results.Loading)
+            try {
+                val results = accountRepo.login(auth = auth)
+                if (results is Results.Success<*>) {
+                    val data = results.data?.firstOrNull()
+                    _currentDriver.value = data as? Driver
+                }
+                emit(results)
+            } catch (e: Exception) {
+                emit(Results.Error(e))
+            }
+        }
     }
 
-    val authState = MutableLiveData<AuthState>()
-
-    private val userId = MutableLiveData<String>()
-
-//    @ExperimentalCoroutinesApi
-//    val currentAccount = userId.switchMap { userId ->
-////        liveData(context = viewModelScope.coroutineContext + Dispatchers.IO) {
-////            accountRepo.accountChangeListener(userId).collect {
-////                if (it is Results.Success<*> && !it.data.isNullOrEmpty())
-////                    emit(it.data.first() as Account)
-////            }
-////        }
-//    }
+    @ExperimentalCoroutinesApi
+    fun signOut(): LiveData<Results> {
+        return liveData {
+            emit(Results.Loading)
+            try {
+                accountRepo.tripDao.clearDriverTable()
+                _currentDriver = MutableLiveData<Driver>()
+                emit(Results.Success<Driver>(code = Results.Success.CODE.LOGOUT_SUCCESS))
+            } catch (e: Exception) {
+                emit(Results.Error(e))
+            }
+        }
+    }
 }

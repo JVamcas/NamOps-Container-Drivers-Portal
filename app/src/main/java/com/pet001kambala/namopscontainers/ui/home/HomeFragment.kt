@@ -70,7 +70,7 @@ class HomeFragment : AbstractFragment() {
                                 tripModel.viewModelScope.launch {
                                     localCopy?.trip?.containerScanDate = DateUtil.localDateToday()
                                     tripModel.updateTripDetails(
-                                        driver = driver,
+                                        driver = driver!!,
                                         localTrip = localCopy!!
                                     ).observe(viewLifecycleOwner) { results ->
                                         when (results) {

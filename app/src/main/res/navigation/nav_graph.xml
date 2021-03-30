@@ -77,5 +77,10 @@
         tools:layout="@layout/fragment_weigh_full_container" />
     <action android:id="@+id/action_global_updateTruckDetailsFragment" app:destination="@id/updateTruckDetailsFragment" />
     <action android:id="@+id/action_global_homeFragment" app:destination="@id/homeFragment" />
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.pet001kambala.namopscontainers.ui.account.LoginFragment"
+        tools:layout="@layout/fragment_login"
+        android:label="Login" /><action android:id="@+id/action_global_loginFragment" app:destination="@id/loginFragment"/>
 
 </navigation>

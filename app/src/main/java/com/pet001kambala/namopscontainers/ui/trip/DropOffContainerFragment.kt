@@ -72,7 +72,7 @@ class DropOffContainerFragment : AbstractTripDetailsFragment() {
                         jobCardCopy?.jobCardItemList = jobCardCopy?.filterPickedUpContainers(trip = localTrip.trip!!)
 
                         tripModel.completeTrip(
-                            driver = driver,
+                            driver = driver!!,
                             localTrip = localTripCopy,
                             jobCard = jobCardCopy!!
                         )

@@ -35,9 +35,7 @@ class NewTripFragment : AbstractTripDetailsFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-
         tripModel.viewModelScope.launch {
-
 
             val jobCard = tripModel.tripDao.loadCurrentJobCard()
             val jobCardItem = jobCard?.jobCardItemList!![0]
@@ -55,14 +53,14 @@ class NewTripFragment : AbstractTripDetailsFragment() {
 
             binding.trip = localTrip.trip
 
-            truck?.let {truck ->
+            truck?.let { truck ->
                 tripModel.loadTruckODO(truck = truck).observe(viewLifecycleOwner) {
                     if (it is Results.Success<*>) {
                         if (!it.data.isNullOrEmpty())
                             localTrip.trip!!.startODM =
                                 (it.data as ArrayList<Truck>).first().odoMeter
 
-                    }else localTrip.trip!!.startODM = "0.0"
+                    } else localTrip.trip!!.startODM = "0.0"
                 }
             }
 
@@ -81,7 +79,7 @@ class NewTripFragment : AbstractTripDetailsFragment() {
                         if (it?.trip?.useBison != true) TripStatus.WEIGH_EMPTY else TripStatus.PICK_UP
                 }
 
-                tripModel.createNewTrip(driver, localTripCopy!!)
+                tripModel.createNewTrip(driver!!, localTripCopy!!)
                     .observe(viewLifecycleOwner) { result ->
                         when (result) {
                             is Results.Loading -> showProgressBar("Creating new trip")

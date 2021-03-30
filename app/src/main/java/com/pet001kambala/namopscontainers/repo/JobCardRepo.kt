@@ -18,7 +18,7 @@ class JobCardRepo {
 
     suspend fun loadPreAssignedJobCards(driver: Driver): Results {
 
-        val results = loadAllJobCardItemsOnIncmpleteJobCards(driver.passCode)
+        val results = loadAllJobCardItemsOnIncmpleteJobCards(driver)
         return if (results is Results.Success<*>) {
             val jobCardItems = results.data as ArrayList<JobCardItem>
             val filteredJobCardItems = jobCardItems.filter { it.driver?.id ?: -1 == driver.id }
@@ -42,7 +42,7 @@ class JobCardRepo {
     }
 
     suspend fun loadUnAssignedJobCards(driver: Driver): Results {
-        val results = loadAllJobCardItemsOnIncmpleteJobCards(driver.passCode)
+        val results = loadAllJobCardItemsOnIncmpleteJobCards(driver)
         return if (results is Results.Success<*>) {
             val jobCardItems = results.data as ArrayList<JobCardItem>
             val filteredJobCardItems = jobCardItems.filter { it.driver?.id ?: -1 == 0 }
@@ -61,8 +61,8 @@ class JobCardRepo {
         } else results
     }
 
-    private suspend fun loadAllJobCardItemsOnIncmpleteJobCards(passCode: String): Results {
-        val url = "http://160.242.10.200:8081/namops_driver_portal/all_job_cards?passcode=$passCode"
+    private suspend fun loadAllJobCardItemsOnIncmpleteJobCards(driver: Driver): Results {
+        val url = "http://160.242.10.200:8081/namops_driver_portal/all_job_cards?surname=${driver.lastName}&passcode=${driver.passCode}"
         val client = OkHttpClient.Builder().build()
         val request = Request.Builder()
             .url(url)
