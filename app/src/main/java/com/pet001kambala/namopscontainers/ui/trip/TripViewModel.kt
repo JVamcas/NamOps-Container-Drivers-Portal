@@ -23,7 +23,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
 
     @ExperimentalCoroutinesApi
     fun createNewTrip(driver: Driver, localTrip: LocalTrip): LiveData<Results> {
-        val oPLiveData = liveData {
+        return liveData {
             emit(Results.Loading)
             try {
                 val results = tripRepo.createNewTrip(driver, localTrip)
@@ -36,7 +36,6 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
                 emit(Results.Error(e))
             }
         }
-        return oPLiveData
     }
 
     @ExperimentalCoroutinesApi
@@ -47,7 +46,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
         wasPickedUp: Boolean = false,
         jobCardComplete: Boolean = false
     ): LiveData<Results> {
-        val oPLiveData = liveData {
+        return liveData {
             emit(Results.Loading)
             try {
                 val results = tripRepo.updateTripDetails(
@@ -66,7 +65,6 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
                 emit(Results.Error(e))
             }
         }
-        return oPLiveData
     }
 
     private fun updateTruckDetails(truck: Truck) {
@@ -188,7 +186,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
     fun completeTrip(
         driver: Driver, jobCard: JobCard, localTrip: LocalTrip
     ): LiveData<Results> {
-        val oPLiveData = liveData {
+        return liveData {
             emit(Results.Loading)
             try {
 
@@ -202,9 +200,11 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
 
                 emit(
                     if (results is Results.Success<*>) {
-                        tripDao.clearJobCardTable()
-                        tripDao.clearTripTable()
-                        _currentTrip.postValue(LocalTrip())
+                        if(results.code !=  Results.Success.CODE.AWAITING_NETWORK){
+                            tripDao.clearJobCardTable()
+                            tripDao.clearTripTable()
+                            _currentTrip.postValue(LocalTrip())
+                        }
                         Results.Success<Trip>(code = Results.Success.CODE.UPDATE_SUCCESS)
                     } else results
                 )
@@ -213,6 +213,5 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
                 Results.Error(e)
             }
         }
-        return oPLiveData
     }
 }

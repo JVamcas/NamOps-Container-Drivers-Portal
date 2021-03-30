@@ -1,6 +1,13 @@
 package com.pet001kambala.namopscontainers.ui
 
 import android.app.Dialog
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.ConnectivityManager.NetworkCallback
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
@@ -8,30 +15,37 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
 import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.ProgressbarBinding
 import com.pet001kambala.namopscontainers.databinding.WarningDialogBinding
 import com.pet001kambala.namopscontainers.model.Driver
+import com.pet001kambala.namopscontainers.model.TripStatus
 import com.pet001kambala.namopscontainers.model.Truck
 import com.pet001kambala.namopscontainers.ui.account.AccountViewModel
 import com.pet001kambala.namopscontainers.ui.account.LoginFragment
 import com.pet001kambala.namopscontainers.ui.home.HomeFragment
 import com.pet001kambala.namopscontainers.ui.trip.AbstractTripDetailsFragment
 import com.pet001kambala.namopscontainers.ui.trip.TripViewModel
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.containerPickedUp
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isInvalid
 import com.pet001kambala.namopscontainers.utils.Results
 import com.pet001kambala.namopscontainers.utils.Results.Error.CODE.*
 import com.pet001kambala.namopscontainers.utils.Results.Success.CODE.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
+import java.lang.Exception
 import java.util.concurrent.atomic.AtomicBoolean
+
 
 abstract class AbstractFragment : Fragment() {
 
@@ -43,6 +57,7 @@ abstract class AbstractFragment : Fragment() {
     var truck: Truck? = null
     val tripModel: TripViewModel by activityViewModels()
 
+    @RequiresApi(Build.VERSION_CODES.N)
     @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -90,6 +105,51 @@ abstract class AbstractFragment : Fragment() {
             }
         }
 
+        val networkCallback: NetworkCallback = object : NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                //on network restored, send data to server
+                tripModel.viewModelScope.launch {
+                    try {
+                        val localTrip = tripModel.tripDao.loadCurrentTrip()
+                        val jobCard = tripModel.tripDao.loadCurrentJobCard()
+                        localTrip?.let {
+                            val tripComplete = it.trip?.tripStatus == TripStatus.COMPLETED
+                            if (tripComplete)
+                                tripModel.completeTrip(
+                                    driver = driver!!,
+                                    localTrip = localTrip,
+                                    jobCard = jobCard!!
+                                )
+                            else
+                                tripModel.updateTripDetails(
+                                    driver = driver!!,
+                                    localTrip = localTrip,
+                                    wasPickedUp = localTrip.trip.containerPickedUp(),
+                                    jobCardComplete = localTrip.trip?.tripStatus == TripStatus.COMPLETED,
+                                    jobCard = jobCard
+                                )
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+
+            override fun onLost(network: Network) {
+                // network unavailable
+            }
+        }
+
+        val connectivityManager =
+            requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        } else {
+            val request = NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build()
+            connectivityManager.registerNetworkCallback(request, networkCallback)
+        }
     }
 
 

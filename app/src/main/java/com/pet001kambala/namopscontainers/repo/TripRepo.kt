@@ -44,6 +44,7 @@ class TripRepo(val app: Application? = null) {
                 .build()
 
             withContext(Dispatchers.IO) {
+
                 val results =
                     client.newCall(request).execute()//wait for the results from the SERVER
                 val data = results.body?.string()
@@ -77,7 +78,7 @@ class TripRepo(val app: Application? = null) {
             e.printStackTrace()
             Results.Success(
                 data = arrayListOf(localTrip),
-                code = Results.Success.CODE.WRITE_SUCCESS
+                code = Results.Success.CODE.AWAITING_NETWORK
             )
         }
     }
@@ -142,8 +143,6 @@ class TripRepo(val app: Application? = null) {
                         jobCard.jobCardItemList.toJson()
                     )
                 }
-
-
                 val req = requestBody.build()
 
                 val request = Request.Builder()
@@ -183,7 +182,7 @@ class TripRepo(val app: Application? = null) {
                 Results.Error(e)
             }
             e.printStackTrace()
-            Results.Success<LocalTrip>(code = Results.Success.CODE.UPDATE_SUCCESS)
+            Results.Success(data = arrayListOf(localTrip) ,code = Results.Success.CODE.AWAITING_NETWORK)
         }
     }
 
@@ -224,28 +223,6 @@ class TripRepo(val app: Application? = null) {
                         }
                     }
                 }
-//            if(localTrip == null){
-//                val results = loadDriverRecentTrip(passCode = passCode)
-//                if(results is Results.Success<*> && !results.data.isNullOrEmpty()){
-//                    val tempTrip =  results.data[0] as Trip
-//                    val tempTruck = Truck().apply {
-//                        truckReg = tempTrip.truckReg
-//                        firstTrailerReg = tempTrip.firstTrailerReg
-//                        secondTrailerReg = tempTrip.secondTrailerReg
-//                    }
-//                    responseArray = arrayListOf(tempTrip,tempTruck)
-//                    val tempLocalTrip = LocalTrip().apply {
-//                        awaitingNetwork = false
-//                        trip = tempTrip
-//                    }
-//
-//                    tripDao.insertTrip(tempLocalTrip)
-//                    tripDao.insertTruck(tempTruck)
-//
-//                }
-//                else responseArray = arrayListOf()
-//            }
-
                 Results.Success(data = responseArray, code = Results.Success.CODE.LOAD_SUCCESS)
             }
         } catch (e: Exception) {
@@ -278,6 +255,7 @@ class TripRepo(val app: Application? = null) {
                 (round(vehicleRecord.first()[30].toDouble() / 10.0)).toString()// vehicle odometer reading
             }
         } catch (e: Exception) {
+            e.printStackTrace()
             "0.0"
         }
     }

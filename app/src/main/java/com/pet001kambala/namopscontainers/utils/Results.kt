@@ -28,7 +28,8 @@ sealed class Results {
             PHONE_VERIFY_SUCCESS,
             CONN_SWITCHED,
             CONN_SUCCESS,
-            CONNECTION_TIMED_OUT
+            CONNECTION_TIMED_OUT,
+            AWAITING_NETWORK
         }
         var dataSeen = false
         val dataIfNotSeen: ArrayList<T>?
