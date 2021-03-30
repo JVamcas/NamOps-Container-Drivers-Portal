@@ -10,14 +10,9 @@
             android:icon="@drawable/ic_home"
             />
         <item
-            android:id="@+id/nav_my_profile"
-            android:title="@string/my_profile"
-            android:icon="@drawable/ic_my_profile"
-            />
-        <item
             android:id="@+id/nav_my_truck"
             android:title="@string/my_truck"
-            android:icon="@drawable/ic_my_profile"
+            android:icon="@drawable/my_truck"
             />
 
         <item android:title="@string/info"

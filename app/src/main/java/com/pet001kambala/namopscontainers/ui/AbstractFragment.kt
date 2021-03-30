@@ -26,6 +26,7 @@ import com.pet001kambala.namopscontainers.ui.account.LoginFragment
 import com.pet001kambala.namopscontainers.ui.home.HomeFragment
 import com.pet001kambala.namopscontainers.ui.trip.AbstractTripDetailsFragment
 import com.pet001kambala.namopscontainers.ui.trip.TripViewModel
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isInvalid
 import com.pet001kambala.namopscontainers.utils.Results
 import com.pet001kambala.namopscontainers.utils.Results.Error.CODE.*
 import com.pet001kambala.namopscontainers.utils.Results.Success.CODE.*
@@ -56,13 +57,14 @@ abstract class AbstractFragment : Fragment() {
 
         driver = accountModel.currentDriver.value
         accountModel.currentDriver.observe(viewLifecycleOwner) {
-            if (driver == null && this@AbstractFragment !is LoginFragment)
+            driver = it
+            if (it.isInvalid() && this@AbstractFragment !is LoginFragment)
                 navController.navigate(R.id.action_global_loginFragment)
 
         }
 
         when {
-            driver == null && this@AbstractFragment !is LoginFragment ->
+            driver.isInvalid() && this@AbstractFragment !is LoginFragment ->
                 navController.navigate(
                     R.id.action_global_loginFragment
                 )

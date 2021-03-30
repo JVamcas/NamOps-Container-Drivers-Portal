@@ -5,10 +5,7 @@ import android.content.Context
 import android.text.TextUtils
 import com.google.gson.*
 import com.google.gson.reflect.TypeToken
-import com.pet001kambala.namopscontainers.model.AbstractModel
-import com.pet001kambala.namopscontainers.model.JobCardItem
-import com.pet001kambala.namopscontainers.model.Trip
-import com.pet001kambala.namopscontainers.model.TripStatus
+import com.pet001kambala.namopscontainers.model.*
 import java.io.File
 import java.lang.reflect.Type
 import java.text.SimpleDateFormat
@@ -118,6 +115,10 @@ class ParseUtil {
             return this!= null &&
                     this.tripStatus !in arrayListOf(
                         TripStatus.START, TripStatus.PICK_UP, TripStatus.WEIGH_EMPTY)
+        }
+
+        fun Driver?.isInvalid(): Boolean{
+            return this == null || (TextUtils.isEmpty(this.firstName))
         }
 
 

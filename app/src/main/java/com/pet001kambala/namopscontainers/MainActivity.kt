@@ -76,12 +76,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 if (curDest != R.id.updateTruckDetailsFragment)
                     navController.navigate(R.id.action_global_updateTruckDetailsFragment)
             }
+            R.id.about_developer -> if (curDest != R.id.aboutDeveloperFragment)
+                navController.navigate(R.id.action_global_aboutDeveloperFragment)
         }
         return false
     }
 
     @ExperimentalCoroutinesApi
     fun onSignOut(view: View) {
+        binding.drawerLayout.closeDrawer(GravityCompat.START)
         accountModel.signOut().observe(this) { results ->
             if (results is Results.Success<*>)
                 Toast.makeText(this, "Signed Out.", Toast.LENGTH_SHORT).show()
