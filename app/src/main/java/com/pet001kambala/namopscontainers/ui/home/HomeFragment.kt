@@ -1,5 +1,11 @@
 package com.pet001kambala.namopscontainers.ui.home
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,6 +23,7 @@ import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.copyOf
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
+import java.lang.Exception
 
 class HomeFragment : AbstractFragment() {
 
@@ -112,6 +119,68 @@ class HomeFragment : AbstractFragment() {
             weighFullBisonBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_weighFullContainerFragment) }
             weighFullBridgeBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_weighFullContainerFragment) }
             dropOffBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_dropOffContainerFragment) }
+        }
+
+        val networkCallback: ConnectivityManager.NetworkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                //on network restored,
+                /** 1. load cached trip and send to server **/
+
+                tripModel.viewModelScope.launch {
+                    try {
+                        val currentTrip =
+                            tripModel.tripDao.loadCurrentTrip()
+                        if (currentTrip?.awaitingNetwork == true) {
+                            println("Network state changed")
+                            val tripComplete = currentTrip.trip?.tripStatus == TripStatus.COMPLETED
+                            val liveData =
+                                if (tripComplete)
+                                    tripModel.completeTrip(
+                                        driver = driver!!,
+                                        localTrip = currentTrip
+                                    )
+                                else
+                                    tripModel.updateTripDetails(
+                                        driver = driver!!,
+                                        localTrip = currentTrip
+                                    )
+
+                            liveData.observe(viewLifecycleOwner) { syncResults ->
+                                when (syncResults) {
+                                    is Results.Loading -> showProgressBar("Server sync...")
+                                    is Results.Success<*> -> {
+                                        endProgressBar()
+                                        showToast("Sync completed.")
+                                        liveData.removeObservers(viewLifecycleOwner)
+                                    }
+                                    else -> {
+                                        endProgressBar()
+                                        parseRepoResults(syncResults)
+                                        liveData.removeObservers(viewLifecycleOwner)
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+
+            override fun onLost(network: Network) {
+                // network unavailable
+            }
+        }
+
+        val connectivityManager =
+            requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            connectivityManager.registerDefaultNetworkCallback(networkCallback)
+        } else {
+            val request = NetworkRequest.Builder()
+                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build()
+            connectivityManager.registerNetworkCallback(request, networkCallback)
         }
     }
 

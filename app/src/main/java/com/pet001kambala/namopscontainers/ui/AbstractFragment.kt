@@ -103,71 +103,8 @@ abstract class AbstractFragment : Fragment() {
                 }
             }
         }
-
-        val networkCallback: NetworkCallback = object : NetworkCallback() {
-            override fun onAvailable(network: Network) {
-                //on network restored,
-                // 1. load cached trips and send to server
-                // 2. load latest [JobCardItem] and cache to room
-
-                tripModel.viewModelScope.launch {
-                    try {
-                        val tripList = tripModel.tripDao.loadAllTrips()?.mapNotNull { it.trip }
-
-                        val currentTrip =
-                            /**tripModel.tripDao.loadCurrentTrip()*/
-                            localTripList?.maxByOrNull { it.id ?: 0 }
-
-                        currentTrip?.let { it ->
-                            val tripComplete = it.trip?.tripStatus == TripStatus.COMPLETED
-                            val liveData =
-                                if (tripComplete)
-                                    tripModel.completeTrip(
-                                        driver = driver!!,
-                                        localTrip = currentTrip
-                                    )
-                                else
-                                    tripModel.updateTripDetails(
-                                        driver = driver!!,
-                                        localTrip = currentTrip
-                                    )
-
-                            liveData.observe(viewLifecycleOwner) { syncResults ->
-                                when (syncResults) {
-                                    is Results.Loading -> showProgressBar("Server sync...")
-                                    is Results.Success<*> -> {
-                                        endProgressBar()
-                                        showToast("Sync completed.")
-                                    }
-                                    else -> {
-                                        endProgressBar()
-                                        parseRepoResults(syncResults)
-                                    }
-                                }
-                            }
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-            }
-
-            override fun onLost(network: Network) {
-                // network unavailable
-            }
-        }
-
-        val connectivityManager =
-            requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            connectivityManager.registerDefaultNetworkCallback(networkCallback)
-        } else {
-            val request = NetworkRequest.Builder()
-                .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build()
-            connectivityManager.registerNetworkCallback(request, networkCallback)
-        }
     }
+
 
 
     protected open fun showProgressBar(message: String) {

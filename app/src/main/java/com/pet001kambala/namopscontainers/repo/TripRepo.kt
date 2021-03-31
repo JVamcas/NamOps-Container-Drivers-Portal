@@ -8,7 +8,6 @@ import com.pet001kambala.namopscontainers.model.*
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.convert
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.toJson
 import com.pet001kambala.namopscontainers.utils.Results
-import com.skydoves.powerspinner.createPowerSpinnerView
 import kotlinx.coroutines.*
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
@@ -34,7 +33,7 @@ class TripRepo(val app: Application? = null) {
             //1. first write to the repository
             val requestBody = FormBody.Builder()
                 .add("passcode", driver.passCode)
-                .add("surname",driver.lastName)
+                .add("surname", driver.lastName)
                 .add("trip", localTrip.trip.toJson())
                 .build()
 
@@ -129,7 +128,7 @@ class TripRepo(val app: Application? = null) {
             withContext(Dispatchers.IO) {
                 //1. first write to the repository
                 val requestBody = FormBody.Builder()
-                    .add("surname",driver.lastName)
+                    .add("surname", driver.lastName)
                     .add("passcode", driver.passCode)
                     .add("trip", localTrip.trip.toJson())
                 val req = requestBody.build()
@@ -170,7 +169,10 @@ class TripRepo(val app: Application? = null) {
                 Results.Error(e)
             }
             e.printStackTrace()
-            Results.Success(data = arrayListOf(localTrip) ,code = Results.Success.CODE.AWAITING_NETWORK)
+            Results.Success(
+                data = arrayListOf(localTrip),
+                code = Results.Success.CODE.AWAITING_NETWORK
+            )
         }
     }
 
@@ -218,9 +220,6 @@ class TripRepo(val app: Application? = null) {
         }
     }
 
-    suspend fun batchTripSync(driver)
-
-
     /***
      * Find the odometer reading for this vehicle from webfleet
      * @param vehicleNo for the vehicle in question
@@ -252,7 +251,7 @@ class TripRepo(val app: Application? = null) {
 
 // Annotates class to be a Room Database with a table (entity) of the Word class
 @Database(
-    entities = [JobCardItem::class, Truck::class, LocalTrip::class, JobCard::class, Driver::class],
+    entities = [Truck::class, LocalTrip::class, JobCard::class, Driver::class],
     version = 1,
     exportSchema = false
 )
@@ -340,14 +339,4 @@ interface CurrentTripDao {
 
     @Query("select * from JobCard limit 1")
     suspend fun loadCurrentJobCard(): JobCard?
-
-    /** [JobCardItem] room table ops */
-    @Insert
-    suspend fun insertJobCardItem(jobCardItem: JobCardItem)
-
-    @Query("delete from JobCard")
-    suspend fun clearJobCardItemTable()
-
-    @Query("select * from JobCard limit 1")
-    suspend fun loadAllJobCardItems(): List<JobCardItem>?
 }

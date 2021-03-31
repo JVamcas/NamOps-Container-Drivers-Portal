@@ -192,7 +192,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
                             tripDao.clearJobCardTable()
                             tripDao.clearTripTable()
                         }
-                        _currentTrip.postValue(LocalTrip())
+                        _currentTrip.value = LocalTrip()
                         results
                     } else results
                 )
@@ -200,13 +200,6 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
             } catch (e: Exception) {
                 Results.Error(e)
             }
-        }
-    }
-
-    fun batchTripSync(tripList: List<LocalTrip>): LiveData<Results>{
-
-        return liveData {
-
         }
     }
 }
