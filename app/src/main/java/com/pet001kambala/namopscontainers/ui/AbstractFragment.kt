@@ -36,7 +36,6 @@ import com.pet001kambala.namopscontainers.ui.account.LoginFragment
 import com.pet001kambala.namopscontainers.ui.home.HomeFragment
 import com.pet001kambala.namopscontainers.ui.trip.AbstractTripDetailsFragment
 import com.pet001kambala.namopscontainers.ui.trip.TripViewModel
-import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.containerPickedUp
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isInvalid
 import com.pet001kambala.namopscontainers.utils.Results
 import com.pet001kambala.namopscontainers.utils.Results.Error.CODE.*
@@ -107,27 +106,45 @@ abstract class AbstractFragment : Fragment() {
 
         val networkCallback: NetworkCallback = object : NetworkCallback() {
             override fun onAvailable(network: Network) {
-                //on network restored, send data to server
+                //on network restored,
+                // 1. load cached trips and send to server
+                // 2. load latest [JobCardItem] and cache to room
+
                 tripModel.viewModelScope.launch {
                     try {
-                        val localTrip = tripModel.tripDao.loadCurrentTrip()
-                        val jobCard = tripModel.tripDao.loadCurrentJobCard()
-                        localTrip?.let {
+                        val tripList = tripModel.tripDao.loadAllTrips()?.mapNotNull { it.trip }
+
+                        val currentTrip =
+                            /**tripModel.tripDao.loadCurrentTrip()*/
+                            localTripList?.maxByOrNull { it.id ?: 0 }
+
+                        currentTrip?.let { it ->
                             val tripComplete = it.trip?.tripStatus == TripStatus.COMPLETED
-                            if (tripComplete)
-                                tripModel.completeTrip(
-                                    driver = driver!!,
-                                    localTrip = localTrip,
-                                    jobCard = jobCard!!
-                                )
-                            else
-                                tripModel.updateTripDetails(
-                                    driver = driver!!,
-                                    localTrip = localTrip,
-                                    wasPickedUp = localTrip.trip.containerPickedUp(),
-                                    jobCardComplete = localTrip.trip?.tripStatus == TripStatus.COMPLETED,
-                                    jobCard = jobCard
-                                )
+                            val liveData =
+                                if (tripComplete)
+                                    tripModel.completeTrip(
+                                        driver = driver!!,
+                                        localTrip = currentTrip
+                                    )
+                                else
+                                    tripModel.updateTripDetails(
+                                        driver = driver!!,
+                                        localTrip = currentTrip
+                                    )
+
+                            liveData.observe(viewLifecycleOwner) { syncResults ->
+                                when (syncResults) {
+                                    is Results.Loading -> showProgressBar("Server sync...")
+                                    is Results.Success<*> -> {
+                                        endProgressBar()
+                                        showToast("Sync completed.")
+                                    }
+                                    else -> {
+                                        endProgressBar()
+                                        parseRepoResults(syncResults)
+                                    }
+                                }
+                            }
                         }
                     } catch (e: Exception) {
                         e.printStackTrace()

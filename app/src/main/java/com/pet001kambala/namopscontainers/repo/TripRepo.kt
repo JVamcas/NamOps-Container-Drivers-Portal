@@ -39,7 +39,7 @@ class TripRepo(val app: Application? = null) {
                 .build()
 
             val request = Request.Builder()
-                .url("$baseUrl/trip")
+                .url("$baseUrl/trip_update")
                 .post(requestBody)
                 .build()
 
@@ -122,10 +122,7 @@ class TripRepo(val app: Application? = null) {
 
     suspend fun updateTripDetails(
         driver: Driver,
-        localTrip: LocalTrip,
-        jobCard: JobCard? = null,
-        wasPickedUp: Boolean = false,
-        jobCardComplete: Boolean = false
+        localTrip: LocalTrip
     ): Results {
 
         return try {
@@ -135,21 +132,12 @@ class TripRepo(val app: Application? = null) {
                     .add("surname",driver.lastName)
                     .add("passcode", driver.passCode)
                     .add("trip", localTrip.trip.toJson())
-                    .add("wasPickedUp", wasPickedUp.toString())
-                    .add("jobCardComplete", jobCardComplete.toString())
-                jobCard?.jobCardItemList?.let {
-                    requestBody.add(
-                        "job_card_items",
-                        jobCard.jobCardItemList.toJson()
-                    )
-                }
                 val req = requestBody.build()
 
                 val request = Request.Builder()
                     .url("$baseUrl/trip_update")
                     .post(req)
                     .build()
-
 
                 val results =
                     client.newCall(request).execute()//wait for the results from the SERVER
@@ -190,7 +178,6 @@ class TripRepo(val app: Application? = null) {
         return try {
             withContext(Dispatchers.IO) {
                 val deferredRecords = listOf(
-
                     async { tripDao.loadCurrentTrip() },
                     async { tripDao.loadCurrentTruck() }
                 )
@@ -231,6 +218,8 @@ class TripRepo(val app: Application? = null) {
         }
     }
 
+    suspend fun batchTripSync(driver)
+
 
     /***
      * Find the odometer reading for this vehicle from webfleet
@@ -263,7 +252,7 @@ class TripRepo(val app: Application? = null) {
 
 // Annotates class to be a Room Database with a table (entity) of the Word class
 @Database(
-    entities = [Truck::class, LocalTrip::class, JobCard::class, Driver::class],
+    entities = [JobCardItem::class, Truck::class, LocalTrip::class, JobCard::class, Driver::class],
     version = 1,
     exportSchema = false
 )
@@ -296,6 +285,8 @@ abstract class TripDatabase : RoomDatabase() {
 
 @Dao
 interface CurrentTripDao {
+
+    /** [Truck] room table ops */
     @Insert
     suspend fun insertTruck(truck: Truck)
 
@@ -308,8 +299,7 @@ interface CurrentTripDao {
     @Query("select * from Truck limit 1")
     suspend fun loadCurrentTruck(): Truck?
 
-    // trip room table ops
-
+    /** [Trip] room table ops */
     @Insert
     suspend fun insertTrip(localTrip: LocalTrip)
 
@@ -319,10 +309,13 @@ interface CurrentTripDao {
     @Query("delete from LocalTrip")
     suspend fun clearTripTable()
 
-    @Query("select * from LocalTrip limit 1")
+    @Query("select * from LocalTrip order by id desc limit 1")
     suspend fun loadCurrentTrip(): LocalTrip?
 
-    // driver room table ops
+    @Query(value = "select * from LocalTrip")
+    suspend fun loadAllTrips(): List<LocalTrip>?
+
+    /** [Driver] room table ops */
     @Insert
     suspend fun insertDriver(driver: Driver)
 
@@ -335,7 +328,7 @@ interface CurrentTripDao {
     @Query("select * from Driver limit 1")
     suspend fun loadCurrentDriver(): Driver?
 
-    // JobCard room table ops
+    /** [JobCard] room table ops */
     @Insert
     suspend fun insertJobCard(jobCard: JobCard)
 
@@ -347,4 +340,14 @@ interface CurrentTripDao {
 
     @Query("select * from JobCard limit 1")
     suspend fun loadCurrentJobCard(): JobCard?
+
+    /** [JobCardItem] room table ops */
+    @Insert
+    suspend fun insertJobCardItem(jobCardItem: JobCardItem)
+
+    @Query("delete from JobCard")
+    suspend fun clearJobCardItemTable()
+
+    @Query("select * from JobCard limit 1")
+    suspend fun loadAllJobCardItems(): List<JobCardItem>?
 }

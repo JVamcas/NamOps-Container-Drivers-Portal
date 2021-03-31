@@ -73,8 +73,7 @@ class DropOffContainerFragment : AbstractTripDetailsFragment() {
 
                         tripModel.completeTrip(
                             driver = driver!!,
-                            localTrip = localTripCopy,
-                            jobCard = jobCardCopy!!
+                            localTrip = localTripCopy
                         )
                             .observe(viewLifecycleOwner) { results ->
                                 when (results) {

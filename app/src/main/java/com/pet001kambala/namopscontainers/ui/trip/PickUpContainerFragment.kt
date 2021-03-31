@@ -92,9 +92,7 @@ class PickUpContainerFragment : AbstractTripDetailsFragment() {
 
                         tripModel.updateTripDetails(
                             driver = driver!!,
-                            localTrip = localTripCopy,
-                            jobCard = jobCardCopy,
-                            wasPickedUp = true
+                            localTrip = localTripCopy
                         ).observe(viewLifecycleOwner) { results ->
                                 when (results) {
                                     is Results.Loading -> showProgressBar("Saving...")

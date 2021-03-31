@@ -121,6 +121,10 @@ class ParseUtil {
             return this == null || (TextUtils.isEmpty(this.firstName))
         }
 
+        fun LocalTrip?.isInvalid(): Boolean{
+            return this == null || this.trip == null
+        }
+
 
         inline fun <I, reified O> I.convert(): O {
             val json = this.toJson()

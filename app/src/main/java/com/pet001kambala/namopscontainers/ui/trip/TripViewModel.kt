@@ -41,20 +41,14 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
     @ExperimentalCoroutinesApi
     fun updateTripDetails(
         driver: Driver,
-        localTrip: LocalTrip,
-        jobCard: JobCard? = null,
-        wasPickedUp: Boolean = false,
-        jobCardComplete: Boolean = false
+        localTrip: LocalTrip
     ): LiveData<Results> {
         return liveData {
             emit(Results.Loading)
             try {
                 val results = tripRepo.updateTripDetails(
                     driver,
-                    localTrip,
-                    jobCard,
-                    wasPickedUp,
-                    jobCardComplete
+                    localTrip
                 )
                 if (results is Results.Success<*>) {
                     val data = results.data?.firstOrNull()
@@ -117,7 +111,7 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
             emit(Results.Loading)
             try {
                 truck.odoMeter = tripRepo.findVehicleOdometer(truck.truckReg!!.toUpperCase())
-                emit(Results.Success(data = arrayListOf(truck),Results.Success.CODE.LOAD_SUCCESS))
+                emit(Results.Success(data = arrayListOf(truck), Results.Success.CODE.LOAD_SUCCESS))
             } catch (e: Exception) {
                 Results.Error(e)
             }
@@ -177,41 +171,42 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
     }
 
 
-
     /**
      * 1. set JobCardItem completed in backend
      * 2. remove [LocalTrip] and [JobCard] from room database
      * 3. set [LocalTrip] to null,
      */
     fun completeTrip(
-        driver: Driver, jobCard: JobCard, localTrip: LocalTrip
+        driver: Driver, localTrip: LocalTrip
     ): LiveData<Results> {
         return liveData {
             emit(Results.Loading)
             try {
-
                 val results = tripRepo.updateTripDetails(
                     driver = driver,
-                    localTrip = localTrip,
-                    jobCard = jobCard,
-                    wasPickedUp = true,
-                    jobCardComplete = true
+                    localTrip = localTrip
                 )
-
                 emit(
                     if (results is Results.Success<*>) {
-                        if(results.code !=  Results.Success.CODE.AWAITING_NETWORK){
+                        if (results.code == Results.Success.CODE.UPDATE_SUCCESS) {
                             tripDao.clearJobCardTable()
                             tripDao.clearTripTable()
-                            _currentTrip.postValue(LocalTrip())
                         }
-                        Results.Success<Trip>(code = Results.Success.CODE.UPDATE_SUCCESS)
+                        _currentTrip.postValue(LocalTrip())
+                        results
                     } else results
                 )
 
             } catch (e: Exception) {
                 Results.Error(e)
             }
+        }
+    }
+
+    fun batchTripSync(tripList: List<LocalTrip>): LiveData<Results>{
+
+        return liveData {
+
         }
     }
 }
