@@ -9,12 +9,9 @@ import androidx.lifecycle.viewModelScope
 import com.pet001kambala.namopscontainers.MainActivity
 import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.FragmentJobcardListBinding
-import com.pet001kambala.namopscontainers.model.Driver
 import com.pet001kambala.namopscontainers.model.JobCard
 import com.pet001kambala.namopscontainers.repo.JobCardRepo
-import com.pet001kambala.namopscontainers.ui.AbstractFragment
 import com.pet001kambala.namopscontainers.ui.AbstractListFragment
-import com.pet001kambala.namopscontainers.ui.trip.TripViewModel
 import com.pet001kambala.namopscontainers.utils.Const
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.toJson
 import com.pet001kambala.namopscontainers.utils.Results
@@ -61,7 +58,7 @@ class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHol
                 showProgressBar("Just a moment...")
 
                 if (isPreAssignedJobs) {
-                    val results = JobCardRepo().loadPreAssignedJobCards(tempDriver)
+                    val results = JobCardRepo().loadAllJobCards(driver = tempDriver,driverId = tempDriver.id)
                     endProgressBar()
                     if (results is Results.Success<*>) {
                         val data = results.data as ArrayList<JobCard>
@@ -77,7 +74,7 @@ class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHol
 
                 } else {
 
-                    val results = JobCardRepo().loadUnAssignedJobCards(tempDriver)
+                    val results = JobCardRepo().loadAllJobCards(driver = tempDriver,driverId = 0)
                     endProgressBar()
                     if (results is Results.Success<*>) {
                         val data = results.data as ArrayList<JobCard>

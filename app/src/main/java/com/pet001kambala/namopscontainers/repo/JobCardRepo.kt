@@ -41,11 +41,11 @@ class JobCardRepo {
         } else results
     }
 
-    suspend fun loadUnAssignedJobCards(driver: Driver): Results {
+    suspend fun loadAllJobCards(driver: Driver, driverId: Int? = 0): Results {
         val results = loadAllJobCardItemsOnIncmpleteJobCards(driver)
         return if (results is Results.Success<*>) {
             val jobCardItems = results.data as ArrayList<JobCardItem>
-            val filteredJobCardItems = jobCardItems.filter { it.driver?.id ?: -1 == 0 }
+            val filteredJobCardItems = jobCardItems.filter { it.driver?.id ?: -1 == driverId }
             val jobCardList = filteredJobCardItems.groupBy { it.jobCardNo }
             val other = jobCardList.map { entry ->
                 JobCard(
