@@ -39,6 +39,10 @@ class AccountViewModel(app: Application) : AndroidViewModel(app) {
             emit(Results.Loading)
             try {
                 accountRepo.tripDao.clearDriverTable()
+                accountRepo.tripDao.clearTripTable()
+                accountRepo.tripDao.clearJobCardTable()
+                accountRepo.tripDao.clearTruckTable()
+
                 _currentDriver.postValue(Driver(id = 0))
                 emit(Results.Success<Driver>(code = Results.Success.CODE.LOGOUT_SUCCESS))
             } catch (e: Exception) {

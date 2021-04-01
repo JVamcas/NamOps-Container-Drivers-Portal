@@ -78,7 +78,6 @@ class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHol
                     endProgressBar()
                     if (results is Results.Success<*>) {
                         val data = results.data as ArrayList<JobCard>
-
                         binding.jobCardCount = data.size
 
                         if (!data.isNullOrEmpty()) {
