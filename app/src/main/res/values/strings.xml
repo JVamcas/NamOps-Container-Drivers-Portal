@@ -9,7 +9,7 @@
     <string name="info">Info</string>
     <string name="about_developer">About Developer</string>
     <string name="user_avatar">User avatar</string>
-    <string name="no_trip_found">No trip found.</string>
+    <string name="no_trip_found">You have not started a trip yet.</string>
     <string name="un_assigned">Un-Assigned Jobs</string>
     <string name="pre_assigned">Pre-Assigned Jobs</string>
 

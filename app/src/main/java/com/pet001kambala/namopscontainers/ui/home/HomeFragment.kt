@@ -20,15 +20,19 @@ import com.pet001kambala.namopscontainers.utils.Const
 import com.pet001kambala.namopscontainers.utils.DateUtil
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.containerPickedUp
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.copyOf
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.toJson
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
 import java.lang.Exception
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 
 class HomeFragment : AbstractFragment() {
 
-    private lateinit var homeViewModel: HomeViewModel
     private lateinit var binding: FragmentHomeBinding
+    val counter = AtomicInteger(0)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -102,7 +106,6 @@ class HomeFragment : AbstractFragment() {
 
                             }
                         })
-
                 }
                 binding.tripLayout.scanContainer.isVisible =
                     localTrip.trip?.containerScanDate == null
@@ -121,59 +124,67 @@ class HomeFragment : AbstractFragment() {
             dropOffBtn.setOnClickListener { navController.navigate(R.id.action_homeFragment_to_dropOffContainerFragment) }
         }
 
-        val networkCallback: ConnectivityManager.NetworkCallback = object : ConnectivityManager.NetworkCallback() {
-            override fun onAvailable(network: Network) {
-                //on network restored,
-                /** 1. load cached trip and send to server **/
+        val connectivityManager =
+            requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val networkCallback: ConnectivityManager.NetworkCallback =
+            object : ConnectivityManager.NetworkCallback() {
+                override fun onAvailable(network: Network) {
+                    //on network restored,
+                    /** 1. load cached trip and send to server **/
 
-                tripModel.viewModelScope.launch {
-                    try {
-                        val currentTrip =
-                            tripModel.tripDao.loadCurrentTrip()
-                        if (currentTrip?.awaitingNetwork == true) {
-                            println("Network state changed")
-                            val tripComplete = currentTrip.trip?.tripStatus == TripStatus.COMPLETED
-                            val liveData =
-                                if (tripComplete)
-                                    tripModel.completeTrip(
-                                        driver = driver!!,
-                                        localTrip = currentTrip
-                                    )
-                                else
-                                    tripModel.updateTripDetails(
-                                        driver = driver!!,
-                                        localTrip = currentTrip
-                                    )
 
-                            liveData.observe(viewLifecycleOwner) { syncResults ->
-                                when (syncResults) {
-                                    is Results.Loading -> showProgressBar("Server sync...")
-                                    is Results.Success<*> -> {
-                                        endProgressBar()
-                                        showToast("Sync completed.")
-                                        liveData.removeObservers(viewLifecycleOwner)
-                                    }
-                                    else -> {
-                                        endProgressBar()
-                                        parseRepoResults(syncResults)
-                                        liveData.removeObservers(viewLifecycleOwner)
+                    tripModel.viewModelScope.launch {
+                        try {
+                            val currentTrip =
+                                tripModel.tripDao.loadCurrentTrip()
+
+                            if (currentTrip?.awaitingNetwork == true) {
+                                if(counter.incrementAndGet() == 1) {
+                                    val tripComplete =
+                                        currentTrip.trip?.tripStatus == TripStatus.COMPLETED
+                                    val liveData =
+                                        if (tripComplete)
+                                            tripModel.completeTrip(
+                                                driver = driver!!,
+                                                localTrip = currentTrip
+                                            )
+                                        else
+                                            tripModel.updateTripDetails(
+                                                driver = driver!!,
+                                                localTrip = currentTrip
+                                            )
+
+                                    liveData.observe(viewLifecycleOwner) { syncResults ->
+                                        when (syncResults) {
+                                            is Results.Loading -> showProgressBar("Server sync...")
+                                            is Results.Success<*> -> {
+                                                counter.set(0)
+                                                endProgressBar()
+                                                showToast("Sync completed.")
+                                                liveData.removeObservers(viewLifecycleOwner)
+                                            }
+                                            else -> {
+                                                counter.set(0)
+                                                endProgressBar()
+                                                parseRepoResults(syncResults)
+                                                liveData.removeObservers(viewLifecycleOwner)
+                                            }
+                                        }
                                     }
                                 }
                             }
+
+                        } catch (e: Exception) {
+                            e.printStackTrace()
                         }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
                     }
                 }
-            }
 
-            override fun onLost(network: Network) {
-                // network unavailable
-            }
-        }
+                override fun onLost(network: Network) {
+                    // network unavailable
+                }
 
-        val connectivityManager =
-            requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             connectivityManager.registerDefaultNetworkCallback(networkCallback)

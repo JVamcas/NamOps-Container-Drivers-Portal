@@ -19,10 +19,10 @@ class JobCardRepo {
     suspend fun loadPreAssignedJobCards(driver: Driver): Results {
 
         val results = loadAllJobCardItemsOnIncmpleteJobCards(driver)
+
         return if (results is Results.Success<*>) {
             val jobCardItems = results.data as ArrayList<JobCardItem>
             val filteredJobCardItems = jobCardItems.filter { it.driver?.id ?: -1 == driver.id }
-
             val jobCardList = if (filteredJobCardItems.isNullOrEmpty()) {
                 filteredJobCardItems.groupBy { it.jobCardNo }
                     .map { item ->
