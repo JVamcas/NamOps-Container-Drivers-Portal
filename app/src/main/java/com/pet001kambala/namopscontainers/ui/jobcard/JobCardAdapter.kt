@@ -9,7 +9,7 @@ import com.pet001kambala.namopscontainers.databinding.JobCardLayoutBinding
 import com.pet001kambala.namopscontainers.model.JobCard
 import com.pet001kambala.namopscontainers.ui.AbstractAdapter
 
-class JobCardAdapter(mListener: ModelViewClickListener<JobCard>) :
+class JobCardAdapter(mListener: ModelViewClickListener<JobCard>,private val viewDriversClickListener: ViewDriversClickListener) :
     AbstractAdapter<JobCard, JobCardAdapter.ViewHolder>(mListener) {
 
 
@@ -32,5 +32,12 @@ class JobCardAdapter(mListener: ModelViewClickListener<JobCard>) :
         binding.root.setOnClickListener {
             mListener.onModelClick(holder.jobCard)
         }
+
+        binding.driverOnJobcard.setOnClickListener {
+            viewDriversClickListener.onViewDrivers(holder.jobCard)
+        }
+    }
+    interface ViewDriversClickListener{
+        fun onViewDrivers(jobCard: JobCard)
     }
 }

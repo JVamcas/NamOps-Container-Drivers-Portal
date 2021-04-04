@@ -2,6 +2,7 @@ package com.pet001kambala.namopscontainers.repo
 
 import android.app.Application
 import android.content.Context
+import android.text.TextUtils
 import androidx.room.*
 import com.google.gson.JsonParser
 import com.pet001kambala.namopscontainers.model.*
@@ -158,7 +159,6 @@ class TripRepo(val app: Application? = null) {
                 } else Results.Error(AbstractModel.ServerException())
             }
         } catch (e: Exception) {
-
             try {
                 localTrip.awaitingNetwork = true
                 tripDao.updateTrip(localTrip)
@@ -247,9 +247,47 @@ class TripRepo(val app: Application? = null) {
             "0.0"
         }
     }
+
+    suspend fun cancelCurrentTrip(driver: Driver, localTrip: LocalTrip): Results {
+        //1. first write to the repository
+        val requestBody = FormBody.Builder()
+            .add("passcode", driver.passCode)
+            .add("surname", driver.lastName)
+            .add("trip", localTrip.trip.toJson())
+            .build()
+
+        val request = Request.Builder()
+            .url("$baseUrl/trip_delete")
+            .post(requestBody)
+            .build()
+        return try {
+            withContext(Dispatchers.IO) {
+
+                if (localTrip.trip?.id != null) {
+                    //1. if persisted to backend
+                    val results =
+                        client.newCall(request).execute()//wait for the results from the SERVER
+                    val data = results.body?.string()
+                    val jsonTree = JsonParser.parseString(data).asJsonObject
+                    val writeResp = jsonTree.get("Status")?.toString()?.replace("\"", "")
+                    if (writeResp == "Success") {
+                        tripDao.clearTripTable()
+                        tripDao.clearJobCardTable()
+                        Results.Success<Trip>(code = Results.Success.CODE.DELETE_SUCCESS)
+                    } else Results.Error(AbstractModel.ServerException())
+                } else {
+                    //never persisted to backend
+                    tripDao.clearTripTable()
+                    tripDao.clearJobCardTable()
+                    Results.Success<Trip>(code = Results.Success.CODE.DELETE_SUCCESS)
+                }
+            }
+        } catch (e: Exception) {
+            Results.Error(e)
+        }
+    }
 }
 
-// Annotates class to be a Room Database with a table (entity) of the Word class
 @Database(
     entities = [Truck::class, LocalTrip::class, JobCard::class, Driver::class],
     version = 1,

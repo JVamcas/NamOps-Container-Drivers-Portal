@@ -111,6 +111,11 @@ class ParseUtil {
             return convert()
         }
 
+
+        fun Trip?.isCancellable() =
+             this !=null && this.tripStatus in listOf(
+                TripStatus.WEIGH_EMPTY, TripStatus.PICK_UP
+            )
         fun Trip?.containerPickedUp():Boolean{
             return this!= null &&
                     this.tripStatus !in arrayListOf(

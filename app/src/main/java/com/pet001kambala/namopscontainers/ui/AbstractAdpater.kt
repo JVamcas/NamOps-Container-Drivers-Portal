@@ -3,6 +3,7 @@ package com.pet001kambala.namopscontainers.ui
 import androidx.annotation.UiThread
 import androidx.recyclerview.widget.RecyclerView
 import com.pet001kambala.namopscontainers.model.AbstractModel
+import com.pet001kambala.namopscontainers.model.JobCard
 
 abstract class AbstractAdapter<K : AbstractModel, T : RecyclerView.ViewHolder>(
     var mListener: ModelViewClickListener<K>

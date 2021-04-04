@@ -92,7 +92,13 @@ class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHol
     }
 
     override fun initAdapter() {
-        mAdapter = JobCardAdapter(this)
+        mAdapter = JobCardAdapter(this, object : JobCardAdapter.ViewDriversClickListener{
+            override fun onViewDrivers(jobCard: JobCard) {
+                val bundle = Bundle().also { it.putString(Const.JOB_CARD,jobCard.toJson()) }
+
+
+            }
+        })
     }
 
     override fun onEditModel(model: JobCard, pos: Int) {

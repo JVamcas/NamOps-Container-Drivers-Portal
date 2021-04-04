@@ -20,6 +20,7 @@ import com.pet001kambala.namopscontainers.utils.Const
 import com.pet001kambala.namopscontainers.utils.DateUtil
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.containerPickedUp
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.copyOf
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isCancellable
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.toJson
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -64,8 +65,37 @@ class HomeFragment : AbstractFragment() {
 
         tripModel.currentLocalTrip.observe(viewLifecycleOwner) {
             binding.trip = it?.trip
+            binding.tripLayout.cancelTripBtn.isVisible = it?.trip.isCancellable()
 
             it?.let { localTrip ->
+
+                binding.tripLayout.cancelTripBtn.setOnClickListener {
+                    showWarningDialog(
+                        warningTxt = "Cancel this trip?",
+                        mListener = object : WarningDialogListener {
+                            override fun onOkWarning() {
+                                tripModel.cancelCurrentTrip(
+                                    driver = driver!!,
+                                    localTrip = localTrip
+                                ).observe(viewLifecycleOwner) { results ->
+                                    when (results) {
+                                        is Results.Loading -> showProgressBar("Just a moment...")
+                                        is Results.Success<*> -> {
+                                            endProgressBar()
+                                            showToast("Success.")
+                                        }
+                                        else -> {
+                                            endProgressBar()
+                                            parseRepoResults(results)
+                                        }
+                                    }
+                                }
+                            }
+
+                            override fun onCancelWarning() {
+                            }
+                        })
+                }
 
                 val tempTrip = localTrip.trip
 
@@ -139,7 +169,7 @@ class HomeFragment : AbstractFragment() {
                                 tripModel.tripDao.loadCurrentTrip()
 
                             if (currentTrip?.awaitingNetwork == true) {
-                                if(counter.incrementAndGet() == 1) {
+                                if (counter.incrementAndGet() == 1) {
                                     val tripComplete =
                                         currentTrip.trip?.tripStatus == TripStatus.COMPLETED
                                     val liveData =
