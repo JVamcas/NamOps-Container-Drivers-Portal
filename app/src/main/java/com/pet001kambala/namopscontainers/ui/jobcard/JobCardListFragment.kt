@@ -95,7 +95,7 @@ class JobCardListFragment : AbstractListFragment<JobCard, JobCardAdapter.ViewHol
         mAdapter = JobCardAdapter(this, object : JobCardAdapter.ViewDriversClickListener{
             override fun onViewDrivers(jobCard: JobCard) {
                 val bundle = Bundle().also { it.putString(Const.JOB_CARD,jobCard.toJson()) }
-
+                navController.navigate(R.id.action_taskListFragment_to_driversOnJobCardFragment,bundle)
 
             }
         })

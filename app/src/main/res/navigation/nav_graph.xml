@@ -40,6 +40,9 @@
         <action
             android:id="@+id/action_taskListFragment_to_newTripFragment"
             app:destination="@id/newTripFragment" />
+        <action
+            android:id="@+id/action_taskListFragment_to_driversOnJobCardFragment"
+            app:destination="@id/driversOnJobCardFragment" />
     </fragment>
     <fragment
         android:id="@+id/newTripFragment"
@@ -87,5 +90,9 @@
         tools:layout="@layout/fragment_about_developer"
         android:name="com.pet001kambala.namopscontainers.ui.account.AboutDeveloperFragment"
         android:label="About Developer" /><action android:id="@+id/action_global_aboutDeveloperFragment" app:destination="@id/aboutDeveloperFragment"/>
+    <fragment
+        android:id="@+id/driversOnJobCardFragment"
+        android:name="com.pet001kambala.namopscontainers.ui.jobcard.DriversOnJobCardFragment"
+        tools:layout="@layout/fragment_drivers_on_job_card" />
 
 </navigation>

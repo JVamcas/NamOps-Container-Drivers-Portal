@@ -100,6 +100,11 @@ class ParseUtil {
             return path.toString()
         }
 
+        @JvmStatic
+        fun parseTripStatus(tripStatus: TripStatus?): String{
+            return tripStatus?.name?.split("_")?.joinToString (separator =" ")?:""
+        }
+
         inline fun <reified O : AbstractModel?> O?.copyOf(): O? {
             if (this == null)
                 return null

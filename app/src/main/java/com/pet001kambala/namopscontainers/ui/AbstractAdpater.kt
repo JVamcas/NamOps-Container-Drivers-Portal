@@ -1,5 +1,6 @@
 package com.pet001kambala.namopscontainers.ui
 
+import android.view.View
 import androidx.annotation.UiThread
 import androidx.recyclerview.widget.RecyclerView
 import com.pet001kambala.namopscontainers.model.AbstractModel

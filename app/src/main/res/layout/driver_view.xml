@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:bind="http://schemas.android.com/apk/res-auto"
+    >
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="2dp"
+        app:strokeColor="@color/emphasis_color"
+        app:strokeWidth="0.5dp"
+        >
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp">
+
+            <include
+                android:id="@+id/user_avatar"
+                layout="@layout/user_icon_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                bind:cameraVisible="@{false}"
+                bind:model="@{trip.driver}"
+                bind:size="@{100}"
+                android:padding="5dp"
+                android:layout_gravity="center"
+                />
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/user_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@{trip.driver.toString()}"
+                android:layout_marginStart="10dp"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toEndOf="@id/user_avatar"
+                />
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@{`Trip Status : `+ParseUtil.parseTripStatus(trip.tripStatus)}"
+                android:layout_marginBottom="2dp"
+                android:textAllCaps="true"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body2"
+                app:layout_constraintTop_toBottomOf="@id/user_name"
+                app:layout_constraintStart_toStartOf="@id/user_name"
+                />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <data>
+        <import type="com.pet001kambala.namopscontainers.utils.ParseUtil"/>
+        <import type="android.view.View"/>
+        <import type="com.pet001kambala.namopscontainers.R" />
+        <variable
+            name="trip"
+            type="com.pet001kambala.namopscontainers.model.Trip" />
+    </data>
+</layout>

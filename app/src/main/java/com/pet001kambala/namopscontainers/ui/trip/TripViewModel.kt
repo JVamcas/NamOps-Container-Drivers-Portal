@@ -211,4 +211,15 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
             }
         }
     }
+    fun loadActiveTripsOnJobCard(driver: Driver, jobCardNo: String) : LiveData<Results>{
+        return liveData {
+            emit(Results.Loading)
+            try {
+                emit(tripRepo.loadActiveTripsOnJobCard(driver,jobCardNo))
+            }
+            catch (e: Exception){
+                Results.Error(e)
+            }
+        }
+    }
 }

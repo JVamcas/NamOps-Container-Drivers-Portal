@@ -286,6 +286,42 @@ class TripRepo(val app: Application? = null) {
             Results.Error(e)
         }
     }
+
+    suspend fun loadActiveTripsOnJobCard(driver: Driver, jobCardNo: String): Results {
+        val url = "${baseUrl}/trip_on_jobCard?surname=${driver.lastName}&passcode=${driver.passCode}&jobCardNo=$jobCardNo"
+        val client = OkHttpClient.Builder().build()
+        val request = Request.Builder()
+            .url(url)
+            .build()
+
+        return try {
+            withContext(Dispatchers.IO) {
+                val results = client.newCall(request).execute()//wait for the results from api
+                val data = results.body?.string()
+
+                val jsonTree = JsonParser.parseString(data).asJsonObject
+
+                when (jsonTree.get("Status").toString().replace("\"", "")) {
+                    "Success" -> {
+                        val jsonData = jsonTree.get("data").toString()
+                        val tripList = if (jsonData.isEmpty())
+                            arrayListOf() else jsonData.convert<ArrayList<Trip>>()
+
+                        Results.Success(
+                            data = tripList,
+                            code = Results.Success.CODE.LOAD_SUCCESS
+                        )
+                    }
+                    "Invalid Auth" -> Results.Error(AbstractModel.InvalidAuthCredException())
+
+                    else -> Results.Error(AbstractModel.ServerException())
+                }
+            }
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+            Results.Error(e)
+        }
+    }
 }
 
 @Database(

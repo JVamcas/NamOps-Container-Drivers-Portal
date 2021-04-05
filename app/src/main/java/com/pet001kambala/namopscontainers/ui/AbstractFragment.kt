@@ -56,7 +56,6 @@ abstract class AbstractFragment : Fragment() {
     var truck: Truck? = null
     val tripModel: TripViewModel by activityViewModels()
 
-    @RequiresApi(Build.VERSION_CODES.N)
     @ExperimentalCoroutinesApi
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

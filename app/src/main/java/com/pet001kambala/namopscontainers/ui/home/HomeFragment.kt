@@ -14,13 +14,17 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.viewModelScope
 import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.FragmentHomeBinding
+import com.pet001kambala.namopscontainers.model.JobCard
 import com.pet001kambala.namopscontainers.model.TripStatus
+import com.pet001kambala.namopscontainers.repo.JobCardRepo
 import com.pet001kambala.namopscontainers.ui.AbstractFragment
+import com.pet001kambala.namopscontainers.ui.account.LoginFragment
 import com.pet001kambala.namopscontainers.utils.Const
 import com.pet001kambala.namopscontainers.utils.DateUtil
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.containerPickedUp
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.copyOf
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isCancellable
+import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isInvalid
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.toJson
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -65,13 +69,14 @@ class HomeFragment : AbstractFragment() {
 
         tripModel.currentLocalTrip.observe(viewLifecycleOwner) {
             binding.trip = it?.trip
-            binding.tripLayout.cancelTripBtn.isVisible = it?.trip.isCancellable()
+            binding.tripLayout.cancelTripBtn.isEnabled = it?.trip.isCancellable()
 
             it?.let { localTrip ->
 
                 binding.tripLayout.cancelTripBtn.setOnClickListener {
                     showWarningDialog(
-                        warningTxt = "Cancel this trip?",
+                        warningTxt = "Warning - This operation cannot be undone!!\n\n" +
+                                "All info pertaining to this trip will be lost.",
                         mListener = object : WarningDialogListener {
                             override fun onOkWarning() {
                                 tripModel.cancelCurrentTrip(
@@ -223,7 +228,26 @@ class HomeFragment : AbstractFragment() {
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build()
             connectivityManager.registerNetworkCallback(request, networkCallback)
         }
+        accountModel.currentDriver.observe(viewLifecycleOwner) { driver ->
+            if (!driver.isInvalid()) {
+                tripModel.viewModelScope.launch {
+                    //job cards pre-assigned to this driver
+                    showProgressBar("")
+                    val results = JobCardRepo().loadAllJobCards(driver = driver, driverId = driver.id)
+                    endProgressBar()
+                    if (results is Results.Success<*>) {
+                        val data = results.data as ArrayList<JobCard>
+                        binding.unassignedJob.isVisible = data.isNullOrEmpty()
+
+                    } else {
+                        endProgressBar()
+                        parseRepoResults(results)
+                    }
+                }
+            }
+        }
     }
+
 
     override fun onBackClick() {
         requireActivity().finish()
