@@ -200,24 +200,26 @@ class TripViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    fun cancelCurrentTrip(driver: Driver,localTrip: LocalTrip) : LiveData<Results>{
+    fun cancelCurrentTrip(driver: Driver, localTrip: LocalTrip): LiveData<Results> {
         return liveData {
             emit(Results.Loading)
             try {
-                emit(tripRepo.cancelCurrentTrip(driver,localTrip))
-            }
-            catch (e: Exception){
+                val results = tripRepo.cancelCurrentTrip(driver, localTrip)
+                if (results is Results.Success<*>)
+                    _currentTrip.value = LocalTrip()
+                emit(results)
+            } catch (e: Exception) {
                 Results.Error(e)
             }
         }
     }
-    fun loadActiveTripsOnJobCard(driver: Driver, jobCardNo: String) : LiveData<Results>{
+
+    fun loadActiveTripsOnJobCard(driver: Driver, jobCardNo: String): LiveData<Results> {
         return liveData {
             emit(Results.Loading)
             try {
-                emit(tripRepo.loadActiveTripsOnJobCard(driver,jobCardNo))
-            }
-            catch (e: Exception){
+                emit(tripRepo.loadActiveTripsOnJobCard(driver, jobCardNo))
+            } catch (e: Exception) {
                 Results.Error(e)
             }
         }

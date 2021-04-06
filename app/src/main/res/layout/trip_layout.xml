@@ -218,8 +218,8 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/sep_sec2"
+                android:backgroundTint="@color/save_btn_enabled"
                 style="@style/exit_btn_outlined"
-                android:backgroundTint="@color/white"
                 app:layout_constraintBottom_toBottomOf="parent"
                 android:layout_margin="10dp"
                 />

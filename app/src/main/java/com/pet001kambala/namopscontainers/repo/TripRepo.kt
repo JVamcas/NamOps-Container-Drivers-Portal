@@ -6,6 +6,7 @@ import android.text.TextUtils
 import androidx.room.*
 import com.google.gson.JsonParser
 import com.pet001kambala.namopscontainers.model.*
+import com.pet001kambala.namopscontainers.utils.Const.Companion.baseUrl
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.convert
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.toJson
 import com.pet001kambala.namopscontainers.utils.Results
@@ -19,7 +20,6 @@ import kotlin.math.round
 
 class TripRepo(val app: Application? = null) {
 
-    var baseUrl: String = "http://160.242.10.200:8081/namops_driver_portal"
     private val client = OkHttpClient.Builder().build()
     val tripDao by lazy { TripDatabase.getDatabase(app!!).tripDao() }
 
@@ -85,7 +85,7 @@ class TripRepo(val app: Application? = null) {
 
     private suspend fun loadDriverRecentTrip(driver: Driver): Results {
         val url =
-            "http://160.242.10.200:8081/namops_driver_portal/recent_incomplete_trip?surname=${driver.lastName}&passcode=${driver.passCode}"
+            "$baseUrl/recent_incomplete_trip?surname=${driver.lastName}&passcode=${driver.passCode}"
         val client = OkHttpClient.Builder().build()
         val request = Request.Builder()
             .url(url)

@@ -6,6 +6,7 @@ import com.pet001kambala.namopscontainers.model.AbstractModel
 import com.pet001kambala.namopscontainers.model.Auth
 import com.pet001kambala.namopscontainers.model.Driver
 import com.pet001kambala.namopscontainers.model.Trip
+import com.pet001kambala.namopscontainers.utils.Const.Companion.baseUrl
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.convert
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.Dispatchers
@@ -33,7 +34,7 @@ class AccountRepo(private val app: Application) {
                     tripDao.clearDriverTable()//remove any driver who was there
 
                     val url =
-                        "http://160.242.10.200:8081/namops_driver_portal/drivers?surname=${auth.surname}&passcode=${auth.passcode}"
+                        "$baseUrl/drivers?surname=${auth.surname}&passcode=${auth.passcode}"
                     val client = OkHttpClient.Builder().build()
                     val request = Request.Builder()
                         .url(url)

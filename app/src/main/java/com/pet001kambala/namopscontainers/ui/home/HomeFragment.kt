@@ -228,24 +228,24 @@ class HomeFragment : AbstractFragment() {
                 .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET).build()
             connectivityManager.registerNetworkCallback(request, networkCallback)
         }
-        accountModel.currentDriver.observe(viewLifecycleOwner) { driver ->
-            if (!driver.isInvalid()) {
-                tripModel.viewModelScope.launch {
-                    //job cards pre-assigned to this driver
-                    showProgressBar("")
-                    val results = JobCardRepo().loadAllJobCards(driver = driver, driverId = driver.id)
-                    endProgressBar()
-                    if (results is Results.Success<*>) {
-                        val data = results.data as ArrayList<JobCard>
-                        binding.unassignedJob.isVisible = data.isNullOrEmpty()
-
-                    } else {
-                        endProgressBar()
-                        parseRepoResults(results)
-                    }
-                }
-            }
-        }
+//        accountModel.currentDriver.observe(viewLifecycleOwner) { driver ->
+//            if (!driver.isInvalid()) {
+//                tripModel.viewModelScope.launch {
+//                    //job cards pre-assigned to this driver
+//                    showProgressBar("")
+//                    val results = JobCardRepo().loadAllJobCards(driver = driver, driverId = driver.id)
+//                    endProgressBar()
+//                    if (results is Results.Success<*>) {
+//                        val data = results.data as ArrayList<JobCard>
+//                        binding.unassignedJob.isVisible = data.isNullOrEmpty()
+//
+//                    } else {
+//                        endProgressBar()
+//                        parseRepoResults(results)
+//                    }
+//                }
+//            }
+//        }
     }
 
 

@@ -5,6 +5,7 @@ import com.pet001kambala.namopscontainers.model.AbstractModel
 import com.pet001kambala.namopscontainers.model.Driver
 import com.pet001kambala.namopscontainers.model.JobCard
 import com.pet001kambala.namopscontainers.model.JobCardItem
+import com.pet001kambala.namopscontainers.utils.Const.Companion.baseUrl
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.convert
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.toJson
 import com.pet001kambala.namopscontainers.utils.Results
@@ -62,7 +63,7 @@ class JobCardRepo {
     }
 
     private suspend fun loadAllJobCardItemsOnIncmpleteJobCards(driver: Driver): Results {
-        val url = "http://160.242.10.200:8081/namops_driver_portal/all_job_cards?surname=${driver.lastName}&passcode=${driver.passCode}"
+        val url = "$baseUrl/all_job_cards?surname=${driver.lastName}&passcode=${driver.passCode}"
         val client = OkHttpClient.Builder().build()
         val request = Request.Builder()
             .url(url)
