@@ -1,6 +1,5 @@
 package com.pet001kambala.namopscontainers.utils
 
-
 import android.content.Context
 import android.text.TextUtils
 import com.google.gson.*
@@ -186,7 +185,8 @@ class ParseUtil {
 
 
         fun String?.isValidContainerNo() =
-            !TextUtils.isEmpty(this) && this?.length ?:0 == 11
+            !this.isNullOrEmpty() && Pattern.compile("^\\w{4}\\d{7}$").matcher(this).matches()
+
 
         fun JobCardItem?.preAssigned() =
             this != null && this.id != 0
