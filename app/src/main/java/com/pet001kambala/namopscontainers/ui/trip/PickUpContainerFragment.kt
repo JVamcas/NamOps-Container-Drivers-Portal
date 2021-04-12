@@ -25,6 +25,7 @@ class PickUpContainerFragment : AbstractTripDetailsFragment() {
 
     lateinit var binding: FragmentPickUpContainerBinding
 
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -42,20 +43,18 @@ class PickUpContainerFragment : AbstractTripDetailsFragment() {
         tripModel.currentLocalTrip.observe(viewLifecycleOwner) {
             it?.let { localTrip ->
 
-
-
-
                 tripModel.viewModelScope.launch {
+                    getDeviceCurrentLocation()
                     binding.trip = localTrip.trip
 
-                    truck?.let {truck ->
+                    truck?.let { truck ->
                         tripModel.loadTruckODO(truck = truck).observe(requireActivity()) {
                             if (it is Results.Success<*>) {
                                 if (!it.data.isNullOrEmpty())
                                     localTrip.trip!!.pickUpODM =
                                         (it.data as ArrayList<Truck>).first().odoMeter
 
-                            }else localTrip.trip!!.pickUpODM = "0.0"
+                            } else localTrip.trip!!.pickUpODM = "0.0"
                         }
                     }
 
@@ -69,7 +68,7 @@ class PickUpContainerFragment : AbstractTripDetailsFragment() {
                     ).forEach {
                         it.setAdapter(
                             ArrayAdapter(
-                                requireContext(),
+                                binding.root.context,
                                 R.layout.auto_select_layout,
                                 jobCard?.jobCardItemList?.filterNot { it.wasPickedUp }
                                     ?.map { it.containerNo }?.toList()!!
@@ -90,23 +89,24 @@ class PickUpContainerFragment : AbstractTripDetailsFragment() {
                         jobCardCopy?.jobCardItemList =
                             jobCardCopy?.filterPickedUpContainers(trip = localTripCopy.trip!!)
 
+                        localTripCopy.trip?.pickUpLocationGPS = location
                         tripModel.updateTripDetails(
                             driver = driver!!,
                             localTrip = localTripCopy
                         ).observe(viewLifecycleOwner) { results ->
-                                when (results) {
-                                    is Results.Loading -> showProgressBar("Saving...")
-                                    is Results.Success<*> -> {
-                                        endProgressBar()
-                                        showToast("Saved.")
-                                        navController.popBackStack()
-                                    }
-                                    else -> {
-                                        endProgressBar()
-                                        parseRepoResults(results)
-                                    }
+                            when (results) {
+                                is Results.Loading -> showProgressBar("Saving...")
+                                is Results.Success<*> -> {
+                                    endProgressBar()
+                                    showToast("Saved.")
+                                    navController.popBackStack()
+                                }
+                                else -> {
+                                    endProgressBar()
+                                    parseRepoResults(results)
                                 }
                             }
+                        }
                     }
                 }
             }

@@ -140,7 +140,7 @@ class BindingUtil {
             containerNo: String?,
             jobCard: JobCard?,
             containerIndex: Int?,
-            trip: Trip
+            trip: Trip?
         ) {
             val containerOnJobCard =
                 jobCard?.jobCardItemList?.any { it.containerNo == containerNo }
@@ -152,11 +152,11 @@ class BindingUtil {
             }
 
             when (containerIndex) {
-                1 -> trip.container1JobCardId = jobCardNo
+                1 -> trip?.container1JobCardId = jobCardNo
 
-                2 -> trip.container2JobCardId = jobCardNo
+                2 -> trip?.container2JobCardId = jobCardNo
 
-                3 -> trip.container3JobCardId = jobCardNo
+                3 -> trip?.container3JobCardId = jobCardNo
             }
 
             mEditText.error =

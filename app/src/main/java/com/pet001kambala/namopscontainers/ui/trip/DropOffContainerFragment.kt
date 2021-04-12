@@ -45,17 +45,17 @@ class DropOffContainerFragment : AbstractTripDetailsFragment() {
                     InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
 
                 tripModel.viewModelScope.launch {
-
+                    getDeviceCurrentLocation()
                     binding.trip = localTrip.trip
 
-                    truck?.let {truck ->
+                    truck?.let { truck ->
                         tripModel.loadTruckODO(truck = truck).observe(viewLifecycleOwner) {
                             if (it is Results.Success<*>) {
                                 if (!it.data.isNullOrEmpty())
                                     localTrip.trip!!.dropOffODM =
                                         (it.data as ArrayList<Truck>).first().odoMeter
 
-                            }else localTrip.trip?.dropOffODM = "0.0"
+                            } else localTrip.trip?.dropOffODM = "0.0"
                         }
                     }
 
@@ -69,7 +69,10 @@ class DropOffContainerFragment : AbstractTripDetailsFragment() {
 
                         val jobCardCopy = jobCard.copyOf()
 
-                        jobCardCopy?.jobCardItemList = jobCardCopy?.filterPickedUpContainers(trip = localTrip.trip!!)
+                        jobCardCopy?.jobCardItemList =
+                            jobCardCopy?.filterPickedUpContainers(trip = localTrip.trip!!)
+
+                        localTripCopy.trip?.dropOffLocationGPS = location
 
                         tripModel.completeTrip(
                             driver = driver!!,

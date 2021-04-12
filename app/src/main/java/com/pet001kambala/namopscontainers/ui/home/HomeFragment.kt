@@ -14,30 +14,23 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.viewModelScope
 import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.FragmentHomeBinding
-import com.pet001kambala.namopscontainers.model.JobCard
 import com.pet001kambala.namopscontainers.model.TripStatus
-import com.pet001kambala.namopscontainers.repo.JobCardRepo
 import com.pet001kambala.namopscontainers.ui.AbstractFragment
-import com.pet001kambala.namopscontainers.ui.account.LoginFragment
 import com.pet001kambala.namopscontainers.utils.Const
 import com.pet001kambala.namopscontainers.utils.DateUtil
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.containerPickedUp
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.copyOf
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isCancellable
-import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isInvalid
-import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.toJson
 import com.pet001kambala.namopscontainers.utils.Results
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Semaphore
-import java.lang.Exception
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 
 class HomeFragment : AbstractFragment() {
 
     private lateinit var binding: FragmentHomeBinding
     val counter = AtomicInteger(0)
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,6 +47,9 @@ class HomeFragment : AbstractFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        tripModel.viewModelScope.launch {
+            getDeviceCurrentLocation()
+        }
         binding.preAssignedJob.setOnClickListener {
             val bundle = Bundle()
             bundle.putString(Const.TOOLBAR_TITLE, "Pre-Assigned Jobs")
@@ -73,12 +69,14 @@ class HomeFragment : AbstractFragment() {
 
             it?.let { localTrip ->
 
+
                 binding.tripLayout.cancelTripBtn.setOnClickListener {
                     showWarningDialog(
                         warningTxt = "Warning - This operation cannot be undone!!\n\n" +
                                 "All info pertaining to this trip will be lost.",
                         mListener = object : WarningDialogListener {
                             override fun onOkWarning() {
+                                localTrip.trip?.startLocationGPS = location
                                 tripModel.cancelCurrentTrip(
                                     driver = driver!!,
                                     localTrip = localTrip
@@ -101,6 +99,7 @@ class HomeFragment : AbstractFragment() {
                             }
                         })
                 }
+
 
                 val tempTrip = localTrip.trip
 

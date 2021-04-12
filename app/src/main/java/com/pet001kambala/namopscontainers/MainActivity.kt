@@ -13,6 +13,8 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.google.android.material.navigation.NavigationView
 import com.pet001kambala.namopscontainers.databinding.ActivityMainBinding
 import com.pet001kambala.namopscontainers.databinding.NavHeaderMainBinding
@@ -29,12 +31,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var tripModel: TripViewModel
     private lateinit var accountModel: AccountViewModel
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         val toolbar = binding.appBarMain.toolbar
         setSupportActionBar(toolbar)
+
+
 
         tripModel = ViewModelProvider(this).get(TripViewModel::class.java)
         accountModel = ViewModelProvider(this).get(AccountViewModel::class.java)

@@ -1,7 +1,12 @@
 package com.pet001kambala.namopscontainers.ui
 
+import android.Manifest
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
+import android.content.Intent
+import android.content.IntentSender
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.ConnectivityManager.NetworkCallback
 import android.net.Network
@@ -15,8 +20,14 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.databinding.Observable
+import androidx.databinding.ObservableField
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LifecycleOwner
@@ -25,6 +36,11 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import androidx.navigation.findNavController
+import androidx.navigation.fragment.NavHostFragment
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
+import com.google.android.gms.tasks.Task
+import com.pet001kambala.namopscontainers.MainActivity
 import com.pet001kambala.namopscontainers.R
 import com.pet001kambala.namopscontainers.databinding.ProgressbarBinding
 import com.pet001kambala.namopscontainers.databinding.WarningDialogBinding
@@ -35,19 +51,23 @@ import com.pet001kambala.namopscontainers.ui.account.AccountViewModel
 import com.pet001kambala.namopscontainers.ui.account.LoginFragment
 import com.pet001kambala.namopscontainers.ui.home.HomeFragment
 import com.pet001kambala.namopscontainers.ui.trip.AbstractTripDetailsFragment
+import com.pet001kambala.namopscontainers.ui.trip.PickUpContainerFragment
 import com.pet001kambala.namopscontainers.ui.trip.TripViewModel
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isInvalid
 import com.pet001kambala.namopscontainers.utils.Results
 import com.pet001kambala.namopscontainers.utils.Results.Error.CODE.*
 import com.pet001kambala.namopscontainers.utils.Results.Success.CODE.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 import java.lang.Exception
 import java.util.concurrent.atomic.AtomicBoolean
 
 
 abstract class AbstractFragment : Fragment() {
 
+    val REQUEST_CHECK_SETTINGS: Int = 8
     private var mDialog: Dialog? = null
     lateinit var navController: NavController
     private lateinit var mProgressbarBinding: ProgressbarBinding
@@ -55,18 +75,91 @@ abstract class AbstractFragment : Fragment() {
     var driver: Driver? = null
     var truck: Truck? = null
     val tripModel: TripViewModel by activityViewModels()
+    lateinit var fusedLocationClient: FusedLocationProviderClient
+    lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
+    var location: String? = null
+    private val locationRequest: LocationRequest = LocationRequest.create().apply {
+        interval = 10000
+        fastestInterval = 5000
+        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+    }
+    lateinit var task: Task<LocationSettingsResponse>
 
-    @ExperimentalCoroutinesApi
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        handleBackClicks()
-        navController = requireActivity().findNavController(R.id.nav_host_fragment)
+    @SuppressLint("MissingPermission")
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        val builder = LocationSettingsRequest.Builder()
+            .addLocationRequest(locationRequest)
+        val client: SettingsClient = LocationServices.getSettingsClient(requireActivity())
+        task = client.checkLocationSettings(builder.build())
 
         tripModel.currentTruck.observe(requireActivity()) {
             it?.let {
                 truck = it
             }
         }
+
+        requestPermissionLauncher =
+            registerForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted: Boolean ->
+                when {
+                    isGranted -> {
+                        // Permission is granted. Continue the action or workflow in your
+                        // app.
+                        parseLocationTask()
+                    }
+                    else -> {
+                        // Explain to the user that the feature is unavailable because the
+                        // features requires a permission that the user has denied. At the
+                        // same time, respect the user's decision. Don't link to system
+                        // settings in an effort to convince the user to change their
+                        // decision.
+                    }
+                }
+            }
+    }
+
+    @SuppressLint("MissingPermission")
+     fun parseLocationTask() {
+        task.addOnSuccessListener {
+            GlobalScope.launch {
+
+                val loc = fusedLocationClient.lastLocation.await()
+                location = loc?.let { "${it.latitude} ${it.longitude}" }
+            }
+        }
+
+        task.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException) {
+                // Location settings are not satisfied, but this can be fixed
+                // by showing the user a dialog.
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    exception.startResolutionForResult(
+                        requireActivity(),
+                        REQUEST_CHECK_SETTINGS
+                    )
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    // Ignore the error.
+                }
+            }
+        }
+    }
+
+
+    @ExperimentalCoroutinesApi
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        handleBackClicks()
+
+        val navHostFragment =
+            (requireActivity() as MainActivity).supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
+
+
 
         driver = accountModel.currentDriver.value
         accountModel.currentDriver.observe(viewLifecycleOwner) {
@@ -104,7 +197,21 @@ abstract class AbstractFragment : Fragment() {
         }
     }
 
+    fun getDeviceCurrentLocation() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+        when (PackageManager.PERMISSION_GRANTED) {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) -> {
+                parseLocationTask()
+            }
 
+            else -> {
+                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        }
+    }
 
     protected open fun showProgressBar(message: String) {
         if (mDialog == null || mDialog?.isShowing == false) {
