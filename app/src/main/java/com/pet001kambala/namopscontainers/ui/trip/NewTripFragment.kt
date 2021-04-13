@@ -35,6 +35,7 @@ class NewTripFragment : AbstractTripDetailsFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
         tripModel.viewModelScope.launch {
 
             val jobCard = tripModel.tripDao.loadCurrentJobCard()
@@ -78,6 +79,8 @@ class NewTripFragment : AbstractTripDetailsFragment() {
                     it?.trip?.tripStatus =
                         if (it?.trip?.useBison != true) TripStatus.WEIGH_EMPTY else TripStatus.PICK_UP
                 }
+
+                localTripCopy?.trip?.startLocationGPS = location
 
                 tripModel.createNewTrip(driver!!, localTripCopy!!)
                     .observe(viewLifecycleOwner) { result ->

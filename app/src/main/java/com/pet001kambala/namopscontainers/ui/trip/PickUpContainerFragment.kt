@@ -25,7 +25,6 @@ class PickUpContainerFragment : AbstractTripDetailsFragment() {
 
     lateinit var binding: FragmentPickUpContainerBinding
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -40,11 +39,12 @@ class PickUpContainerFragment : AbstractTripDetailsFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+
         tripModel.currentLocalTrip.observe(viewLifecycleOwner) {
             it?.let { localTrip ->
 
                 tripModel.viewModelScope.launch {
-                    getDeviceCurrentLocation()
+
                     binding.trip = localTrip.trip
 
                     truck?.let { truck ->

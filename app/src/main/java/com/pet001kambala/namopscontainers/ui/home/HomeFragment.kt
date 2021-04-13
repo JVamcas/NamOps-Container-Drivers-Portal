@@ -47,9 +47,7 @@ class HomeFragment : AbstractFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        tripModel.viewModelScope.launch {
-            getDeviceCurrentLocation()
-        }
+
         binding.preAssignedJob.setOnClickListener {
             val bundle = Bundle()
             bundle.putString(Const.TOOLBAR_TITLE, "Pre-Assigned Jobs")
@@ -69,14 +67,13 @@ class HomeFragment : AbstractFragment() {
 
             it?.let { localTrip ->
 
-
                 binding.tripLayout.cancelTripBtn.setOnClickListener {
                     showWarningDialog(
                         warningTxt = "Warning - This operation cannot be undone!!\n\n" +
                                 "All info pertaining to this trip will be lost.",
                         mListener = object : WarningDialogListener {
                             override fun onOkWarning() {
-                                localTrip.trip?.startLocationGPS = location
+
                                 tripModel.cancelCurrentTrip(
                                     driver = driver!!,
                                     localTrip = localTrip

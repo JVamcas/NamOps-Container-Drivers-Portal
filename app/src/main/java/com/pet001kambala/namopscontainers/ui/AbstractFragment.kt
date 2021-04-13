@@ -53,6 +53,8 @@ import com.pet001kambala.namopscontainers.ui.home.HomeFragment
 import com.pet001kambala.namopscontainers.ui.trip.AbstractTripDetailsFragment
 import com.pet001kambala.namopscontainers.ui.trip.PickUpContainerFragment
 import com.pet001kambala.namopscontainers.ui.trip.TripViewModel
+import com.pet001kambala.namopscontainers.utils.Const
+import com.pet001kambala.namopscontainers.utils.Const.Companion.REQUEST_CHECK_SETTINGS
 import com.pet001kambala.namopscontainers.utils.ParseUtil.Companion.isInvalid
 import com.pet001kambala.namopscontainers.utils.Results
 import com.pet001kambala.namopscontainers.utils.Results.Error.CODE.*
@@ -61,13 +63,14 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import okhttp3.internal.wait
 import java.lang.Exception
 import java.util.concurrent.atomic.AtomicBoolean
 
 
 abstract class AbstractFragment : Fragment() {
 
-    val REQUEST_CHECK_SETTINGS: Int = 8
+
     private var mDialog: Dialog? = null
     lateinit var navController: NavController
     private lateinit var mProgressbarBinding: ProgressbarBinding
@@ -75,24 +78,12 @@ abstract class AbstractFragment : Fragment() {
     var driver: Driver? = null
     var truck: Truck? = null
     val tripModel: TripViewModel by activityViewModels()
-    lateinit var fusedLocationClient: FusedLocationProviderClient
-    lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
-    var location: String? = null
-    private val locationRequest: LocationRequest = LocationRequest.create().apply {
-        interval = 10000
-        fastestInterval = 5000
-        priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-    }
-    lateinit var task: Task<LocationSettingsResponse>
+
+
 
     @SuppressLint("MissingPermission")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val builder = LocationSettingsRequest.Builder()
-            .addLocationRequest(locationRequest)
-        val client: SettingsClient = LocationServices.getSettingsClient(requireActivity())
-        task = client.checkLocationSettings(builder.build())
 
         tripModel.currentTruck.observe(requireActivity()) {
             it?.let {
@@ -100,53 +91,31 @@ abstract class AbstractFragment : Fragment() {
             }
         }
 
-        requestPermissionLauncher =
-            registerForActivityResult(
-                ActivityResultContracts.RequestPermission()
-            ) { isGranted: Boolean ->
-                when {
-                    isGranted -> {
-                        // Permission is granted. Continue the action or workflow in your
-                        // app.
-                        parseLocationTask()
-                    }
-                    else -> {
-                        // Explain to the user that the feature is unavailable because the
-                        // features requires a permission that the user has denied. At the
-                        // same time, respect the user's decision. Don't link to system
-                        // settings in an effort to convince the user to change their
-                        // decision.
-                    }
-                }
-            }
-    }
 
-    @SuppressLint("MissingPermission")
-     fun parseLocationTask() {
-        task.addOnSuccessListener {
-            GlobalScope.launch {
 
-                val loc = fusedLocationClient.lastLocation.await()
-                location = loc?.let { "${it.latitude} ${it.longitude}" }
-            }
-        }
 
-        task.addOnFailureListener { exception ->
-            if (exception is ResolvableApiException) {
-                // Location settings are not satisfied, but this can be fixed
-                // by showing the user a dialog.
-                try {
-                    // Show the dialog by calling startResolutionForResult(),
-                    // and check the result in onActivityResult().
-                    exception.startResolutionForResult(
-                        requireActivity(),
-                        REQUEST_CHECK_SETTINGS
-                    )
-                } catch (sendEx: IntentSender.SendIntentException) {
-                    // Ignore the error.
-                }
-            }
-        }
+//        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
+
+//        requestPermissionLauncher =
+//            registerForActivityResult(
+//                ActivityResultContracts.RequestPermission()
+//            ) { isGranted: Boolean ->
+//                when {
+//                    isGranted -> {
+//                        // Permission is granted. Continue the action or workflow in your
+//                        // app.
+//                        parseLocationTask()
+//                    }
+//                    else -> {
+//                        // Explain to the user that the feature is unavailable because the
+//                        // features requires a permission that the user has denied. At the
+//                        // same time, respect the user's decision. Don't link to system
+//                        // settings in an effort to convince the user to change their
+//                        // decision.
+//                        print("Hellow")
+//                    }
+//                }
+//            }
     }
 
 
@@ -158,8 +127,6 @@ abstract class AbstractFragment : Fragment() {
         val navHostFragment =
             (requireActivity() as MainActivity).supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHostFragment.navController
-
-
 
         driver = accountModel.currentDriver.value
         accountModel.currentDriver.observe(viewLifecycleOwner) {
@@ -197,21 +164,50 @@ abstract class AbstractFragment : Fragment() {
         }
     }
 
-    fun getDeviceCurrentLocation() {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-        when (PackageManager.PERMISSION_GRANTED) {
-            ContextCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) -> {
-                parseLocationTask()
-            }
-
-            else -> {
-                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-            }
-        }
-    }
+//    @SuppressLint("MissingPermission")
+//    private fun parseLocationTask() {
+//        task.addOnSuccessListener {
+//            GlobalScope.launch {
+//                val loc = fusedLocationClient.lastLocation.await()
+//                location = loc?.let { "${it.latitude} ${it.longitude}" }
+//                showToast("Location is ${location}")
+//            }
+//        }
+//
+//        task.addOnFailureListener { exception ->
+//            if (exception is ResolvableApiException) {
+//                // Location settings are not satisfied, but this can be fixed
+//                // by showing the user a dialog.
+//                try {
+//                    // Show the dialog by calling startResolutionForResult(),
+//                    // and check the result in onActivityResult().
+//                    exception.startResolutionForResult(
+//                        requireActivity(),
+//                        REQUEST_CHECK_SETTINGS
+//                    )
+//                } catch (sendEx: IntentSender.SendIntentException) {
+//                    // Ignore the error.
+//                    sendEx.printStackTrace()
+//                }
+//            }
+//        }
+//    }
+//
+//    fun getDeviceCurrentLocation() {
+//        when (PackageManager.PERMISSION_GRANTED) {
+//            ContextCompat.checkSelfPermission(
+//                requireContext(),
+//                Manifest.permission.ACCESS_FINE_LOCATION
+//            ) -> {
+//                showToast("Show location called.")
+//                parseLocationTask()
+//            }
+//
+//            else -> {
+//                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+//            }
+//        }
+//    }
 
     protected open fun showProgressBar(message: String) {
         if (mDialog == null || mDialog?.isShowing == false) {

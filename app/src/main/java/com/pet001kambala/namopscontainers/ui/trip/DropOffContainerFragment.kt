@@ -45,7 +45,7 @@ class DropOffContainerFragment : AbstractTripDetailsFragment() {
                     InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
 
                 tripModel.viewModelScope.launch {
-                    getDeviceCurrentLocation()
+
                     binding.trip = localTrip.trip
 
                     truck?.let { truck ->
